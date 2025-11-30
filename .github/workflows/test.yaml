@@ -20,6 +20,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Dar permissão ao mvnw
+        run: chmod +x mvnw
+
       - name: Instalar Docker Compose
         run: |
           sudo apt-get update
@@ -28,7 +31,6 @@ jobs:
       - name: Subir ambiente com Docker Compose
         run: docker-compose -f docker-compose.yaml up -d
 
-      # opcional: espera o banco subir
       - name: Aguardar banco / serviços estarem prontos
         run: sleep 25
 
