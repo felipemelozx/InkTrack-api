@@ -1,4 +1,4 @@
-package com.InkTrack;
+package com.inktrack;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
