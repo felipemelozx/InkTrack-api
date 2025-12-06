@@ -2,8 +2,10 @@ package com.inktrack.infrastructure.mapper;
 
 import com.inktrack.core.domain.User;
 import com.inktrack.core.usecases.user.CreateUserRequestModel;
+import com.inktrack.core.usecases.user.AuthRequest;
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
 import com.inktrack.infrastructure.dtos.user.CreateUserResponse;
+import com.inktrack.infrastructure.dtos.user.LoginRequest;
 import com.inktrack.infrastructure.entity.UserEntity;
 import org.springframework.stereotype.Component;
 
@@ -24,5 +26,9 @@ public class UserMapper {
 
   public CreateUserResponse userDomainToCreateResponse(User user) {
     return new CreateUserResponse(user.getId(), user.getName(), user.getEmail(), user.getCreatedAt());
+  }
+
+  public AuthRequest loginRequestToRequestModel(LoginRequest request) {
+    return new AuthRequest(request.email(), request.password());
   }
 }

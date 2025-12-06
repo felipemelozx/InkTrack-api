@@ -22,7 +22,8 @@ public class UserGatewayImp implements UserGateway {
 
   @Override
   public Optional<User> findByEmail(String email) {
-    return userRepository.findByEmail(email);
+    return userRepository.findByEmail(email)
+        .map(userMapper::entityToDomain);
   }
 
   @Override
