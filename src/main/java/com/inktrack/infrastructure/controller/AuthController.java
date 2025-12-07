@@ -1,12 +1,12 @@
 package com.inktrack.infrastructure.controller;
 
 import com.inktrack.core.domain.User;
-import com.inktrack.core.gateway.JwtGateway;
+import com.inktrack.core.usecases.user.AuthRequest;
+import com.inktrack.core.usecases.user.AuthTokens;
 import com.inktrack.core.usecases.user.CreateUserRequestModel;
 import com.inktrack.core.usecases.user.CreateUserUseCase;
 import com.inktrack.core.usecases.user.LoginUseCase;
-import com.inktrack.core.usecases.user.AuthRequest;
-import com.inktrack.core.usecases.user.AuthTokens;
+import com.inktrack.core.usecases.user.RefreshTokenUseCase;
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
 import com.inktrack.infrastructure.dtos.user.CreateUserResponse;
 import com.inktrack.infrastructure.dtos.user.LoginRequest;
@@ -21,21 +21,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
   private final CreateUserUseCase createUserUseCase;
   private final LoginUseCase loginUseCase;
-  private final JwtGateway jwtGateway;
+  private final RefreshTokenUseCase refreshTokenUseCase;
   private final UserMapper userMapper;
 
-  public AuthController(CreateUserUseCase createUserUseCase, LoginUseCase loginUseCase, JwtGateway jwtGateway, UserMapper userMapper) {
+  public AuthController(
+      CreateUserUseCase createUserUseCase,
+      LoginUseCase loginUseCase,
+      RefreshTokenUseCase refreshTokenUseCase,
+      UserMapper userMapper
+  ) {
     this.createUserUseCase = createUserUseCase;
     this.loginUseCase = loginUseCase;
-    this.jwtGateway = jwtGateway;
+    this.refreshTokenUseCase = refreshTokenUseCase;
     this.userMapper = userMapper;
   }
 
@@ -58,11 +61,9 @@ public class AuthController {
 
   @PostMapping("/refresh")
   public ResponseEntity<ApiResponse<AuthTokens>> refresh(
-      @Valid @RequestBody RefreshTokenRequest request) {
-
-    UUID userId = jwtGateway.validateRefreshToken(request.refreshToken());
-    String newAccessToken = jwtGateway.generateAccessToken(userId);
-    AuthTokens tokens = new AuthTokens(newAccessToken, request.refreshToken());
+      @Valid @RequestBody RefreshTokenRequest request
+  ) {
+    AuthTokens tokens = refreshTokenUseCase.execute(request.refreshToken());
     ApiResponse<AuthTokens> body = ApiResponse.success(tokens);
     return ResponseEntity.ok(body);
   }

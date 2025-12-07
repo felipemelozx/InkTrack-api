@@ -1,7 +1,10 @@
 package com.inktrack.infrastructure.exception;
 
 import com.inktrack.core.exception.EmailAlreadyExistsException;
+import com.inktrack.core.exception.EmailNotFoundException;
 import com.inktrack.core.exception.FieldDomainValidationException;
+import com.inktrack.core.exception.InvalidCredentialsException;
+import com.inktrack.core.exception.UnauthorizedException;
 import com.inktrack.infrastructure.utils.CustomFieldError;
 import com.inktrack.infrastructure.utils.response.ApiResponse;
 import org.springframework.http.HttpStatus;
@@ -66,7 +69,7 @@ public class RestExceptionHandler {
   ) {
     return new ResponseEntity<>(
         ApiResponse.failure(List.of(new CustomFieldError("email", ex.getMessage())), ex.getMessage()),
-        HttpStatus.BAD_REQUEST
+        HttpStatus.CONFLICT
     );
   }
 
@@ -80,6 +83,57 @@ public class RestExceptionHandler {
             "Domain validation failed for field: " + ex.getFieldName()
         ),
         HttpStatus.BAD_REQUEST
+    );
+  }
+
+  @ExceptionHandler(EmailNotFoundException.class)
+  public ResponseEntity<ApiResponse<CustomFieldError>> handleEmailNotFoundException(
+      EmailNotFoundException ex
+  ) {
+    return new ResponseEntity<>(
+        ApiResponse.failure(List.of(new CustomFieldError("email", ex.getMessage())), ex.getMessage()),
+        HttpStatus.BAD_REQUEST
+    );
+  }
+
+
+  @ExceptionHandler(UnauthorizedException.class)
+  public ResponseEntity<ApiResponse<CustomFieldError>> handleUnauthorizedException(
+      UnauthorizedException ex
+  ) {
+    return new ResponseEntity<>(
+        ApiResponse.failure(List.of(new CustomFieldError("Credentials", ex.getMessage())), ex.getMessage()),
+        HttpStatus.UNAUTHORIZED
+    );
+  }
+
+  @ExceptionHandler(InvalidCredentialsException.class)
+  public ResponseEntity<ApiResponse<CustomFieldError>> handleUnauthorizedException(
+      InvalidCredentialsException ex
+  ) {
+    return new ResponseEntity<>(
+        ApiResponse.failure(List.of(new CustomFieldError("Credentials", ex.getMessage())), ex.getMessage()),
+        HttpStatus.BAD_REQUEST
+    );
+  }
+
+  @ExceptionHandler(com.auth0.jwt.exceptions.JWTDecodeException.class)
+  public ResponseEntity<ApiResponse<CustomFieldError>> handleJWTDecodeException(
+      com.auth0.jwt.exceptions.JWTDecodeException ex
+  ) {
+    return new ResponseEntity<>(
+        ApiResponse.failure(List.of(new CustomFieldError("token", "Invalid token format")), "Invalid token format"),
+        HttpStatus.UNAUTHORIZED
+    );
+  }
+
+  @ExceptionHandler(com.auth0.jwt.exceptions.JWTVerificationException.class)
+  public ResponseEntity<ApiResponse<CustomFieldError>> handleJWTVerificationException(
+      com.auth0.jwt.exceptions.JWTVerificationException ex
+  ) {
+    return new ResponseEntity<>(
+        ApiResponse.failure(List.of(new CustomFieldError("token", "Invalid or expired token")), "Invalid or expired token"),
+        HttpStatus.UNAUTHORIZED
     );
   }
 }

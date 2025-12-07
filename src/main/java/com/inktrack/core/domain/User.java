@@ -1,7 +1,6 @@
 package com.inktrack.core.domain;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 public class User {
@@ -40,19 +39,4 @@ public class User {
     return createdAt;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (o == null || getClass() != o.getClass()) return false;
-    User that = (User) o;
-    return Objects.equals(id, that.id)
-        && Objects.equals(name, that.name)
-        && Objects.equals(email, that.email)
-        && Objects.equals(password, that.password)
-        && Objects.equals(createdAt, that.createdAt);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, name, email, password, createdAt);
-  }
 }

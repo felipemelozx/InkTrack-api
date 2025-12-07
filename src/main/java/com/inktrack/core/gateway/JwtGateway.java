@@ -10,8 +10,11 @@ public interface JwtGateway {
   String generateRefreshToken(UUID userId);
 
   UUID extractUserId(String token);
+
   String extractTokenType(String token);
+
   UUID validateRefreshToken(String token);
+
   default Date getAccessTokenExpiry() {
     return new Date(
         java.time.LocalDateTime.now()

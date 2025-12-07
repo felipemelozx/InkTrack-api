@@ -9,12 +9,12 @@ import com.inktrack.core.utils.Validation;
 import java.time.LocalDateTime;
 
 
-public class CreateUserUseCaseImp implements CreateUserUseCase {
+public class CreateUserUseCaseImpl implements CreateUserUseCase {
 
   private final UserGateway userGateway;
   private final PasswordGateway passwordGateway;
 
-  public CreateUserUseCaseImp(UserGateway userGateway, PasswordGateway passwordGateway) {
+  public CreateUserUseCaseImpl(UserGateway userGateway, PasswordGateway passwordGateway) {
     this.userGateway = userGateway;
     this.passwordGateway = passwordGateway;
   }
