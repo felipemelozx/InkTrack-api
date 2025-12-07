@@ -14,6 +14,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 
 import java.util.List;
 
@@ -117,9 +119,9 @@ public class RestExceptionHandler {
     );
   }
 
-  @ExceptionHandler(com.auth0.jwt.exceptions.JWTDecodeException.class)
+  @ExceptionHandler(JWTDecodeException.class)
   public ResponseEntity<ApiResponse<CustomFieldError>> handleJWTDecodeException(
-      com.auth0.jwt.exceptions.JWTDecodeException ex
+      JWTDecodeException ex
   ) {
     return new ResponseEntity<>(
         ApiResponse.failure(List.of(new CustomFieldError("token", "Invalid token format")), "Invalid token format"),
@@ -127,9 +129,9 @@ public class RestExceptionHandler {
     );
   }
 
-  @ExceptionHandler(com.auth0.jwt.exceptions.JWTVerificationException.class)
+  @ExceptionHandler(JWTVerificationException.class)
   public ResponseEntity<ApiResponse<CustomFieldError>> handleJWTVerificationException(
-      com.auth0.jwt.exceptions.JWTVerificationException ex
+      JWTVerificationException ex
   ) {
     return new ResponseEntity<>(
         ApiResponse.failure(List.of(new CustomFieldError("token", "Invalid or expired token")), "Invalid or expired token"),
