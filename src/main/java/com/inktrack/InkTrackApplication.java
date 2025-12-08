@@ -1,0 +1,13 @@
+package com.inktrack;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class InkTrackApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(InkTrackApplication.class, args);
+	}
+
+}
