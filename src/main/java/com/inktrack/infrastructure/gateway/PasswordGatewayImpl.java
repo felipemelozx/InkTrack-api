@@ -5,11 +5,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PasswordGatewayImp implements PasswordGateway {
+public class PasswordGatewayImpl implements PasswordGateway {
 
   private final BCryptPasswordEncoder encoder;
 
-  public PasswordGatewayImp(BCryptPasswordEncoder encoder) {
+  public PasswordGatewayImpl(BCryptPasswordEncoder encoder) {
     this.encoder = encoder;
   }
 

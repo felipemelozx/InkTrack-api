@@ -28,11 +28,11 @@ class UserGatewayIntegrationTest {
     @Autowired
     private UserMapper userMapper;
 
-    private UserGatewayImp userGateway;
+    private UserGatewayImpl userGateway;
 
     @BeforeEach
     void setUp() {
-        userGateway = new UserGatewayImp(userRepository, userMapper);
+        userGateway = new UserGatewayImpl(userRepository, userMapper);
         userRepository.deleteAll();
     }
 
