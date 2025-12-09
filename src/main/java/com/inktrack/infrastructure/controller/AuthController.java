@@ -8,7 +8,7 @@ import com.inktrack.core.usecases.user.CreateUserUseCase;
 import com.inktrack.core.usecases.user.LoginUseCase;
 import com.inktrack.core.usecases.user.RefreshTokenUseCase;
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
-import com.inktrack.infrastructure.dtos.user.CreateUserResponse;
+import com.inktrack.infrastructure.dtos.user.UserResponse;
 import com.inktrack.infrastructure.dtos.user.LoginRequest;
 import com.inktrack.infrastructure.dtos.user.RefreshTokenRequest;
 import com.inktrack.infrastructure.mapper.UserMapper;
@@ -43,11 +43,11 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<ApiResponse<CreateUserResponse>> create(@Valid @RequestBody CreateUserRequest request) {
+  public ResponseEntity<ApiResponse<UserResponse>> create(@Valid @RequestBody CreateUserRequest request) {
     CreateUserRequestModel requestModel = userMapper.createRequestToRequestModel(request);
     User userData = createUserUseCase.execute(requestModel);
-    CreateUserResponse userResponse = userMapper.userDomainToCreateResponse(userData);
-    ApiResponse<CreateUserResponse> body = ApiResponse.success(userResponse);
+    UserResponse userResponse = userMapper.userDomainToResponse(userData);
+    ApiResponse<UserResponse> body = ApiResponse.success(userResponse);
     return ResponseEntity.status(HttpStatus.CREATED).body(body);
   }
 
