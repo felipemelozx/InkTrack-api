@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class UserGatewayImp implements UserGateway {
+public class UserGatewayImpl implements UserGateway {
 
   private final UserRepository userRepository;
   private final UserMapper userMapper;
 
-  public UserGatewayImp(UserRepository userRepository, UserMapper userMapper) {
+  public UserGatewayImpl(UserRepository userRepository, UserMapper userMapper) {
     this.userRepository = userRepository;
     this.userMapper = userMapper;
   }
