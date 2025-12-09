@@ -16,20 +16,15 @@ public interface JwtGateway {
   UUID validateRefreshToken(String token);
 
   default Date getAccessTokenExpiry() {
-    return new Date(
-        java.time.LocalDateTime.now()
-            .plusMinutes(15)
-            .toInstant(java.time.ZoneOffset.UTC)
-            .toEpochMilli()
+    return Date.from(
+        java.time.Instant.now().plusSeconds(15 * 60)  // 15 min
     );
   }
 
+
   default Date getRefreshTokenExpiry() {
-    return new Date(
-        java.time.LocalDateTime.now()
-            .plusDays(7)
-            .toInstant(java.time.ZoneOffset.UTC)
-            .toEpochMilli()
+    return Date.from(
+        java.time.Instant.now().plusSeconds(7 * 24 * 60 * 60) // 7 dias
     );
   }
 }
