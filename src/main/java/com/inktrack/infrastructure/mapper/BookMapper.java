@@ -69,4 +69,14 @@ public class BookMapper {
         book.getUpdatedAt()
     );
   }
+
+  public Book modelInputToEntityPreSave(BookModelInput modelInput, User currentUser) {
+   return new Book(
+        currentUser,
+        modelInput.title(),
+        modelInput.author(),
+        modelInput.totalPages(),
+        modelInput.pagesRead()
+    );
+  }
 }
