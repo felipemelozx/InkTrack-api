@@ -2,7 +2,7 @@ package com.inktrack.core.domain;
 
 import java.time.OffsetDateTime;
 
-public class Book {
+public class  Book {
   private Long id;
   private User user;
   private String title;
