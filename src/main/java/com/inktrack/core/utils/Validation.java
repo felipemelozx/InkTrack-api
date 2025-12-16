@@ -3,7 +3,8 @@ package com.inktrack.core.utils;
 import com.inktrack.core.exception.FieldDomainValidationException;
 import com.inktrack.core.usecases.user.CreateUserRequestModel;
 
-public class Validation {
+public final class Validation {
+
   private Validation() {}
 
   public static void validate(CreateUserRequestModel input) {
@@ -21,13 +22,17 @@ public class Validation {
   }
 
   public static boolean isValidEmail(String email) {
-    if (email == null) return false;
+    if (email == null) {
+      return false;
+    }
 
     return email.matches("^[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,}$");
   }
 
   public static boolean isStrongPassword(String password) {
-    if (password == null) return false;
+    if (password == null) {
+      return false;
+    }
 
     return PasswordCheck.LENGTH_PATTERN.matcher(password).find()
         && PasswordCheck.UPPERCASE_PATTERN.matcher(password).find()

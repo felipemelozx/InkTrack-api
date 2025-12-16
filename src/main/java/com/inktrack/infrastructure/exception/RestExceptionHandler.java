@@ -134,8 +134,9 @@ public class RestExceptionHandler {
   public ResponseEntity<ApiResponse<CustomFieldError>> handleJWTVerificationException(
       JWTVerificationException ex
   ) {
+    CustomFieldError error = new CustomFieldError("token", "Invalid or expired token");
     return new ResponseEntity<>(
-        ApiResponse.failure(List.of(new CustomFieldError("token", "Invalid or expired token")), "Invalid or expired token"),
+        ApiResponse.failure(List.of(error), "Invalid or expired token"),
         HttpStatus.UNAUTHORIZED
     );
   }
