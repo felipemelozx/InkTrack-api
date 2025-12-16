@@ -17,11 +17,21 @@ public record ApiResponse<T>(
   }
 
   public static <T> ApiResponse<T> success(T data) {
-    return new ApiResponse<>(true, "Operação realizada com sucesso.", data, Collections.emptyList(), LocalDateTime.now());
+    return new ApiResponse<>(true, 
+      "Operação realizada com sucesso.", 
+      data, 
+      Collections.emptyList(), 
+      LocalDateTime.now()
+    );
   }
 
   public static <T> ApiResponse<T> successNoContent() {
-    return new ApiResponse<>(true, "Operação realizada com sucesso.", null, Collections.emptyList(), LocalDateTime.now());
+    return new ApiResponse<>(
+      true, 
+      "Operação realizada com sucesso.",
+      null, Collections.emptyList(), 
+      LocalDateTime.now()
+    );
   }
 
   public static <T> ApiResponse<T> failure(List<CustomFieldError> errors, String message) {
