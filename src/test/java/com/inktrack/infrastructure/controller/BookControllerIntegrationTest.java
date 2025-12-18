@@ -85,7 +85,7 @@ class BookControllerIntegrationTest {
   void shouldCreateBookSuccessfully() throws Exception {
     String token = authenticateAndGetToken();
 
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, 0);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
 
     mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)
@@ -105,7 +105,7 @@ class BookControllerIntegrationTest {
   @Test
   @DisplayName("Should return Forbidden when not authenticated")
   void shouldReturnForbiddenWhenNotAuthenticated() throws Exception {
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, 0);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
 
     mockMvc.perform(post("/books")
             .contentType(MediaType.APPLICATION_JSON)
@@ -118,7 +118,7 @@ class BookControllerIntegrationTest {
   void shouldReturnBadRequestWhenTitleIsMissing() throws Exception {
     String token = authenticateAndGetToken();
 
-    BookCreateRequest request = new BookCreateRequest("", "Robert C. Martin", 464, 0);
+    BookCreateRequest request = new BookCreateRequest("", "Robert C. Martin", 464);
 
     mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)
@@ -132,7 +132,7 @@ class BookControllerIntegrationTest {
   void shouldReturnBadRequestWhenAuthorIsMissing() throws Exception {
     String token = authenticateAndGetToken();
 
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "", 464, 0);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "", 464);
 
     mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)

@@ -2,7 +2,7 @@ package com.inktrack.core.usecases.book;
 
 import com.inktrack.core.domain.User;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record BookModelOutPut(
     Long id,
@@ -11,7 +11,7 @@ public record BookModelOutPut(
     String author,
     int totalPages,
     int pagesRead,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt
+    OffsetDateTime createdAt,
+    OffsetDateTime updatedAt
 ) {
 }

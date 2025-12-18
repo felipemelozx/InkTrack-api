@@ -1,8 +1,8 @@
 package com.inktrack.infrastructure.controller;
 
-import com.inktrack.core.domain.Book;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.usecases.book.BookModelInput;
+import com.inktrack.core.usecases.book.BookModelOutPut;
 import com.inktrack.core.usecases.book.CreateBookUseCase;
 import com.inktrack.infrastructure.dtos.book.BookCreateRequest;
 import com.inktrack.infrastructure.dtos.book.BookResponse;
@@ -42,8 +42,8 @@ public class BookController {
 
     BookModelInput modelInput = bookMapper.requestDtoToModelInput(request);
     User userLogged = userMapper.entityToDomain(currentUser);
-    Book bookSaved = createBookUseCase.execute(modelInput, userLogged);
-    BookResponse response = bookMapper.domainToResponse(bookSaved);
+    BookModelOutPut bookSaved = createBookUseCase.execute(modelInput, userLogged);
+    BookResponse response = bookMapper.modelOutPutToResponse(bookSaved);
     ApiResponse<BookResponse> body = ApiResponse.success(response);
     return ResponseEntity.status(HttpStatus.CREATED).body(body);
   }
