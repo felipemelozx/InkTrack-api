@@ -3,6 +3,7 @@ package com.inktrack.infrastructure.mapper;
 import com.inktrack.core.domain.Book;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.usecases.book.BookModelInput;
+import com.inktrack.core.usecases.book.BookModelOutPut;
 import com.inktrack.infrastructure.dtos.book.BookCreateRequest;
 import com.inktrack.infrastructure.dtos.book.BookResponse;
 import com.inktrack.infrastructure.dtos.user.UserResponse;
@@ -51,8 +52,7 @@ public class BookMapper {
     return new BookModelInput(
         bookCreateRequest.title(),
         bookCreateRequest.author(),
-        bookCreateRequest.totalPages(),
-        bookCreateRequest.pagesRead()
+        bookCreateRequest.totalPages()
     );
   }
 
@@ -75,8 +75,21 @@ public class BookMapper {
         currentUser,
         modelInput.title(),
         modelInput.author(),
-        modelInput.totalPages(),
-        modelInput.pagesRead()
+        modelInput.totalPages()
+    );
+  }
+
+  public BookResponse modelOutPutToResponse(BookModelOutPut bookModelOutPut) {
+    UserResponse userResponse = userMapper.userDomainToResponse(bookModelOutPut.user());
+    return new BookResponse(
+        bookModelOutPut.id(),
+        userResponse,
+        bookModelOutPut.title(),
+        bookModelOutPut.author(),
+        bookModelOutPut.totalPages(),
+        bookModelOutPut.pagesRead(),
+        bookModelOutPut.createdAt(),
+        bookModelOutPut.updatedAt()
     );
   }
 }
