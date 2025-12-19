@@ -14,10 +14,17 @@ public class CreateBookUseCaseImpl implements CreateBookUseCase {
 
   @Override
   public BookModelOutPut execute(BookModelInput modelInput, User currentUser) {
-    if (currentUser == null) throw new IllegalArgumentException("User not logged in");
+    if (currentUser == null) {
+      throw new IllegalArgumentException("User not logged in");
+    };
 
-    if(modelInput.totalPages() < 0) throw new IllegalArgumentException("The total pages must be greater than zero.");
-    if(modelInput.title().isBlank() || modelInput.author().isBlank()) throw new IllegalArgumentException("The title and author not can be black or null.");
+    if(modelInput.totalPages() < 0) {
+      throw new IllegalArgumentException("The total pages must be greater than zero.");
+    }
+
+    if(modelInput.title().isBlank() || modelInput.author().isBlank()) {
+      throw new IllegalArgumentException("The title and author not can be black or null.");
+    }
     Book book = new Book(
         currentUser,
         modelInput.title(),
