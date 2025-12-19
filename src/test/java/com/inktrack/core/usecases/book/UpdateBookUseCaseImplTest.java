@@ -40,16 +40,17 @@ class UpdateBookUseCaseImplTest {
   @DisplayName("Should update book successfully when all data is valid")
   void execute_shouldUpdateBook_whenDataIsValid() {
     OffsetDateTime sevenDaysBeforeToday = OffsetDateTime.now().minusDays(7);
-    Book bookSaved = new Book(
-        1l,
-        validUser,
-        "Clean Code",
-        "Robert C. Martin",
-        464,
-        0,
-        sevenDaysBeforeToday,
-        sevenDaysBeforeToday
-    );
+    Book bookSaved = Book.builder()
+        .id(1L)
+        .user(validUser)
+        .title("Clean Code")
+        .author("Robert C. Martin")
+        .totalPages(464)
+        .pagesRead(0)
+        .createdAt(sevenDaysBeforeToday)
+        .updatedAt(sevenDaysBeforeToday)
+        .build();
+
     BookModelInput input = new BookModelInput("Clean Code Pdf", "Robert C. Martin", 500);
 
     when(bookGateway.findByIdAndUserId(bookSaved.getId(), validUser.getId())).thenReturn(bookSaved);
@@ -58,7 +59,16 @@ class UpdateBookUseCaseImplTest {
 
     when(bookGateway.update(any(Book.class))).thenAnswer(invocation -> {
       Book b = invocation.getArgument(0);
-      return new Book(b.getId(), b.getUser(), b.getTitle(), b.getAuthor(), b.getTotalPages(), b.getPagesRead(), b.getCreatedAt(), now);
+      return Book.builder()
+          .id(b.getId())
+          .user(b.getUser())
+          .title(b.getTitle())
+          .author(b.getAuthor())
+          .totalPages(b.getTotalPages())
+          .pagesRead(b.getPagesRead())
+          .createdAt(b.getCreatedAt())
+          .updatedAt(now)
+          .build();
     });
 
     BookModelOutPut response = updateBookUseCase.execute(bookSaved.getId(), input, validUser.getId());
@@ -71,6 +81,4 @@ class UpdateBookUseCaseImplTest {
     verify(bookGateway).findByIdAndUserId(bookSaved.getId(), validUser.getId());
     verify(bookGateway).update(any(Book.class));
   }
-
-
 }

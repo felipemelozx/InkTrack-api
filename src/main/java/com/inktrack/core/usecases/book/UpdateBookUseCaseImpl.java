@@ -18,16 +18,17 @@ public class UpdateBookUseCaseImpl implements UpdateBookUseCase{
   public BookModelOutPut execute(Long id, BookModelInput modelInput, UUID userId) {
     Book book = bookGateway.findByIdAndUserId(id, userId);
 
-    Book bookUpdated = new Book(
-        book.getId(),
-        book.getUser(),
-        modelInput.title(),
-        modelInput.author(),
-        modelInput.totalPages(),
-        book.getPagesRead(),
-        book.getCreatedAt(),
-        OffsetDateTime.now()
-    );
+    Book bookUpdated = Book.builder()
+        .id(book.getId())
+        .user(book.getUser())
+        .title(modelInput.title())
+        .author(modelInput.author())
+        .totalPages(modelInput.totalPages())
+        .pagesRead(book.getPagesRead())
+        .createdAt(book.getCreatedAt())
+        .updatedAt(OffsetDateTime.now())
+        .build();
+
     Book savedBook = bookGateway.update(bookUpdated);
     return new BookModelOutPut(
         savedBook.getId(),

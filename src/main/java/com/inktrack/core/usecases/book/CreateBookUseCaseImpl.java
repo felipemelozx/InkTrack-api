@@ -25,12 +25,13 @@ public class CreateBookUseCaseImpl implements CreateBookUseCase {
     if(modelInput.title().isBlank() || modelInput.author().isBlank()) {
       throw new IllegalArgumentException("The title and author not can be black or null.");
     }
-    Book book = new Book(
-        currentUser,
-        modelInput.title(),
-        modelInput.author(),
-        modelInput.totalPages()
-    );
+    Book book = Book.builder()
+        .user(currentUser)
+        .title(modelInput.title())
+        .author(modelInput.author())
+        .totalPages(modelInput.totalPages())
+        .build();
+
     Book bookSaved = bookGateway.save(book);
     return new BookModelOutPut(
         bookSaved.getId(),

@@ -58,18 +58,20 @@ class BookGatewayIntegrationTest {
         LocalDateTime.now()
     );
 
-    UserEntity savedEntity = userRepository.save(userMapper.domainToEntity(user));
+    UserEntity savedEntity =
+        userRepository.save(userMapper.domainToEntity(user));
+
     savedUser = userMapper.entityToDomain(savedEntity);
   }
 
   @Test
   void shouldSaveBookSuccessfully() {
-    Book book = new Book(
-        savedUser,
-        "Clean Code",
-        "Robert C. Martin",
-        450
-    );
+    Book book = Book.builder()
+        .user(savedUser)
+        .title("Clean Code")
+        .author("Robert C. Martin")
+        .totalPages(450)
+        .build();
 
     Book savedBook = bookGateway.save(book);
 
@@ -79,19 +81,21 @@ class BookGatewayIntegrationTest {
     assertEquals(0, savedBook.getPagesRead());
     assertNotNull(savedBook.getCreatedAt());
 
-    Optional<BookEntity> entityInDb = bookRepository.findById(savedBook.getId());
+    Optional<BookEntity> entityInDb =
+        bookRepository.findById(savedBook.getId());
+
     assertTrue(entityInDb.isPresent());
     assertEquals("Clean Code", entityInDb.get().getTitle());
   }
 
   @Test
   void shouldFindBookByIdAndUserId() {
-    Book book = new Book(
-        savedUser,
-        "Domain-Driven Design",
-        "Eric Evans",
-        560
-    );
+    Book book = Book.builder()
+        .user(savedUser)
+        .title("Domain-Driven Design")
+        .author("Eric Evans")
+        .totalPages(560)
+        .build();
 
     Book savedBook = bookGateway.save(book);
 
@@ -108,46 +112,42 @@ class BookGatewayIntegrationTest {
   @Test
   void shouldThrowExceptionWhenBookNotFound() {
     Long nonExistentBookId = 999L;
+    UUID userId = savedUser.getId();
 
     assertThrows(
         BookNotFoundException.class,
-        () -> bookGateway.findByIdAndUserId(
-            nonExistentBookId,
-            savedUser.getId()
-        )
+        () -> bookGateway.findByIdAndUserId(nonExistentBookId, userId)
     );
   }
 
   @Test
   void shouldNotFindBookFromAnotherUser() {
-    Book book = new Book(
-        savedUser,
-        "Refactoring",
-        "Martin Fowler",
-        420
-    );
+    Book book = Book.builder()
+        .user(savedUser)
+        .title("Refactoring")
+        .author("Martin Fowler")
+        .totalPages(420)
+        .build();
 
     Book savedBook = bookGateway.save(book);
 
     UUID anotherUserId = UUID.randomUUID();
+    Long bookId = savedBook.getId();
 
     assertThrows(
         BookNotFoundException.class,
-        () -> bookGateway.findByIdAndUserId(
-            savedBook.getId(),
-            anotherUserId
-        )
+        () -> bookGateway.findByIdAndUserId(bookId, anotherUserId)
     );
   }
 
   @Test
   void shouldUpdateBookSuccessfully() {
-    Book book = new Book(
-        savedUser,
-        "Effective Java",
-        "Joshua Bloch",
-        380
-    );
+    Book book = Book.builder()
+        .user(savedUser)
+        .title("Effective Java")
+        .author("Joshua Bloch")
+        .totalPages(380)
+        .build();
 
     Book savedBook = bookGateway.save(book);
 
@@ -158,7 +158,9 @@ class BookGatewayIntegrationTest {
     assertEquals(120, updatedBook.getPagesRead());
     assertNotNull(updatedBook.getUpdatedAt());
 
-    Optional<BookEntity> entityInDb = bookRepository.findById(updatedBook.getId());
+    Optional<BookEntity> entityInDb =
+        bookRepository.findById(updatedBook.getId());
+
     assertTrue(entityInDb.isPresent());
     assertEquals(120, entityInDb.get().getPagesRead());
   }
