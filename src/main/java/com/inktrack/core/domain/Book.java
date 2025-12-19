@@ -3,7 +3,7 @@ package com.inktrack.core.domain;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
-public class Book {
+public final class Book {
 
   private final Long id;
   private final User user;
@@ -43,7 +43,7 @@ public class Book {
     return new Builder();
   }
 
-  public static class Builder {
+  public static final class Builder {
 
     private Long id;
     private User user;

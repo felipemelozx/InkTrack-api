@@ -75,7 +75,7 @@ public class BookEntity {
     return new Builder();
   }
 
-  public static class Builder {
+  public static final class Builder {
 
     private Long id;
     private UserEntity user;
