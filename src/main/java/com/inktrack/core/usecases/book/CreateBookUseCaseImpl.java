@@ -16,7 +16,7 @@ public class CreateBookUseCaseImpl implements CreateBookUseCase {
   public BookModelOutPut execute(BookModelInput modelInput, User currentUser) {
     if (currentUser == null) {
       throw new IllegalArgumentException("User not logged in");
-    };
+    }
 
     if(modelInput.totalPages() < 0) {
       throw new IllegalArgumentException("The total pages must be greater than zero.");
