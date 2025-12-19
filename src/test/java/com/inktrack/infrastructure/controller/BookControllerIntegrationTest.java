@@ -20,9 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 
+import java.util.UUID;
+
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -139,5 +143,89 @@ class BookControllerIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("Should update book successfully when authenticated and data is valid")
+  void shouldUpdateBookSuccessfully() throws Exception {
+    String token = authenticateAndGetToken();
+
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
+
+    mockMvc.perform(post("/books")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.data.id").value(notNullValue()))
+        .andExpect(jsonPath("$.data.title").value("Clean Code"))
+        .andExpect(jsonPath("$.data.author").value("Robert C. Martin"))
+        .andExpect(jsonPath("$.data.totalPages").value(464));
+
+    var books = bookRepository.findAll();
+    assert books.size() == 1;
+    assert books.get(0).getTitle().equals("Clean Code");
+
+    Long bookId = books.get(0).getId();
+    BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500);
+
+    mockMvc.perform(put("/books/" + bookId)
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(updateRequest)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.id").value(notNullValue()))
+        .andExpect(jsonPath("$.data.title").value(updateRequest.title()))
+        .andExpect(jsonPath("$.data.author").value(updateRequest.author()))
+        .andExpect(jsonPath("$.data.totalPages").value(updateRequest.totalPages()));
+
+
+    books = bookRepository.findAll();
+    assert books.size() == 1;
+    assert books.get(0).getTitle().equals(updateRequest.title());
+    assert books.get(0).getAuthor().equals(updateRequest.author());
+    assert books.get(0).getTotalPages().equals(updateRequest.totalPages());
+  }
+
+  @Test
+  @DisplayName("Should trows BookNotFoundException when id is invalid")
+  void shouldThrowsBookNotFoundException() throws Exception {
+    String token = authenticateAndGetToken();
+    UUID userId = userRepository.findAll().get(0).getId();
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
+
+    mockMvc.perform(post("/books")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.data.id").value(notNullValue()))
+        .andExpect(jsonPath("$.data.title").value("Clean Code"))
+        .andExpect(jsonPath("$.data.author").value("Robert C. Martin"))
+        .andExpect(jsonPath("$.data.totalPages").value(464));
+
+    var books = bookRepository.findAll();
+    assert books.size() == 1;
+    assert books.get(0).getTitle().equals("Clean Code");
+
+    Long bookId = books.get(0).getId();
+    BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500);
+    Long invalidBookId = bookId + 1;
+    mockMvc.perform(put("/books/" + invalidBookId)
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(updateRequest)))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.data").value(nullValue()))
+        .andExpect(jsonPath("$.errors").value(notNullValue()))
+        .andExpect(jsonPath("$.errors[0].field").value("id"))
+        .andExpect(jsonPath("$.errors[0].message").value("Book not found with this id: " +  invalidBookId + " and user id: " + userId));
+
+
+    books = bookRepository.findAll();
+    assert books.size() == 1;
+    assert books.get(0).getTitle().equals(request.title());
+    assert books.get(0).getAuthor().equals(request.author());
+    assert books.get(0).getTotalPages().equals(request.totalPages());
   }
 }
