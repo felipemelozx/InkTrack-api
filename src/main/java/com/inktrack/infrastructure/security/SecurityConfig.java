@@ -24,7 +24,9 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) {
 
     http
-        .csrf(csrf -> csrf.disable())
+        .csrf(csrf -> csrf
+            .ignoringRequestMatchers("/**")
+        )
         .cors(Customizer.withDefaults())
         .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
