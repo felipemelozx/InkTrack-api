@@ -42,7 +42,16 @@ class CreateBookUseCaseImplTest {
 
         when(bookGateway.save(any(Book.class))).thenAnswer(invocation -> {
             Book b = invocation.getArgument(0);
-            return new Book(1L, b.getUser(), b.getTitle(), b.getAuthor(), b.getTotalPages(), b.getPagesRead(), now, now);
+            return Book.builder()
+                .id(1l)
+                .user(b.getUser())
+                .title(b.getTitle())
+                .author(b.getAuthor())
+                .totalPages(b.getTotalPages())
+                .pagesRead(b.getPagesRead())
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
         });
 
         BookModelOutPut response = createBookUseCase.execute(input, validUser);

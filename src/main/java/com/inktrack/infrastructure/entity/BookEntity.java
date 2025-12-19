@@ -1,6 +1,5 @@
 package com.inktrack.infrastructure.entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,6 +14,7 @@ import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
 
+
 @Entity
 @Table(name = "tb_books")
 public class BookEntity {
@@ -26,7 +26,6 @@ public class BookEntity {
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
-
 
   @Column(nullable = false)
   private String title;
@@ -46,37 +45,95 @@ public class BookEntity {
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
 
+
+  protected BookEntity() {
+  }
+
+  private BookEntity(Builder builder) {
+    this.id = builder.id;
+    this.user = builder.user;
+    this.title = builder.title;
+    this.author = builder.author;
+    this.totalPages = builder.totalPages;
+    this.pagesRead = builder.pagesRead;
+    this.createdAt = builder.createdAt;
+    this.updatedAt = builder.updatedAt;
+  }
+
   @PrePersist
   protected void onCreate() {
-    createdAt = OffsetDateTime.now();
-    updatedAt = OffsetDateTime.now();
+    this.createdAt = OffsetDateTime.now();
+    this.updatedAt = OffsetDateTime.now();
   }
 
   @PreUpdate
   protected void onUpdate() {
-    updatedAt = OffsetDateTime.now();
+    this.updatedAt = OffsetDateTime.now();
   }
 
-  protected BookEntity() {}
+  public static Builder builder() {
+    return new Builder();
+  }
 
-  public BookEntity(
-      Long id,
-      UserEntity user,
-      String title,
-      String author,
-      Integer totalPages,
-      Integer pagesRead,
-      OffsetDateTime createdAt,
-      OffsetDateTime updatedAt
-  ) {
-    this.id = id;
-    this.user = user;
-    this.title = title;
-    this.author = author;
-    this.totalPages = totalPages;
-    this.pagesRead = pagesRead;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
+  public static class Builder {
+
+    private Long id;
+    private UserEntity user;
+    private String title;
+    private String author;
+    private Integer totalPages;
+    private Integer pagesRead;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+
+    private Builder() {}
+
+    public Builder id(Long id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder user(UserEntity user) {
+      this.user = user;
+      return this;
+    }
+
+    public Builder title(String title) {
+      this.title = title;
+      return this;
+    }
+
+    public Builder author(String author) {
+      this.author = author;
+      return this;
+    }
+
+    public Builder totalPages(Integer totalPages) {
+      this.totalPages = totalPages;
+      return this;
+    }
+
+    public Builder pagesRead(Integer pagesRead) {
+      this.pagesRead = pagesRead;
+      return this;
+    }
+
+    public Builder createdAt(OffsetDateTime createdAt) {
+      this.createdAt = createdAt;
+      return this;
+    }
+
+    public Builder updatedAt(OffsetDateTime updatedAt) {
+      this.updatedAt = updatedAt;
+      return this;
+    }
+
+    public BookEntity build() {
+      if (user == null || title == null || author == null || totalPages <= 0) {
+        throw new IllegalStateException("User, title and author are required");
+      }
+      return new BookEntity(this);
+    }
   }
 
   public Long getId() {
@@ -87,40 +144,20 @@ public class BookEntity {
     return user;
   }
 
-  public void setUser(UserEntity user) {
-    this.user = user;
-  }
-
   public String getTitle() {
     return title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
   }
 
   public String getAuthor() {
     return author;
   }
 
-  public void setAuthor(String author) {
-    this.author = author;
-  }
-
   public Integer getTotalPages() {
     return totalPages;
   }
 
-  public void setTotalPages(Integer totalPages) {
-    this.totalPages = totalPages;
-  }
-
   public Integer getPagesRead() {
     return pagesRead;
-  }
-
-  public void setPagesRead(Integer pagesRead) {
-    this.pagesRead = pagesRead;
   }
 
   public OffsetDateTime getCreatedAt() {
@@ -129,9 +166,5 @@ public class BookEntity {
 
   public OffsetDateTime getUpdatedAt() {
     return updatedAt;
-  }
-
-  public void setUpdatedAt(OffsetDateTime updatedAt) {
-    this.updatedAt = updatedAt;
   }
 }
