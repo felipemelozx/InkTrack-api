@@ -17,7 +17,6 @@ public class BookGatewayImpl implements BookGateway {
   private final BookRepository bookRepository;
   private final BookMapper bookMapper;
 
-
   public BookGatewayImpl(BookRepository bookRepository, BookMapper bookMapper) {
     this.bookRepository = bookRepository;
     this.bookMapper = bookMapper;
