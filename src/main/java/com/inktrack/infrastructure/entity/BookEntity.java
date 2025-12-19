@@ -76,7 +76,7 @@ public class BookEntity {
     return user;
   }
 
-  public void setUserId(UserEntity user) {
+  public void setUser(UserEntity user) {
     this.user = user;
   }
 

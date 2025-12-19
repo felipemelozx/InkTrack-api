@@ -64,6 +64,26 @@ public class  Book {
     this.updatedAt = null;
   }
 
+  public Book(
+      User user,
+      String title,
+      String author,
+      int totalPages
+  ) {
+    if (totalPages <= 0) {
+      throw new IllegalArgumentException("totalPages must be greater than zero");
+    }
+
+    this.id = null;
+    this.user = user;
+    this.title = title;
+    this.author = author;
+    this.totalPages = totalPages;
+    this.pagesRead = 0;
+    this.createdAt = null;
+    this.updatedAt = null;
+  }
+
   public void updatePagesRead(int newValue) {
     if (newValue < 0 || newValue > totalPages) {
       throw new IllegalArgumentException("pagesRead must be between 0 and totalPages");

@@ -4,18 +4,20 @@ import com.inktrack.core.domain.User;
 import com.inktrack.core.usecases.book.BookModelInput;
 import com.inktrack.core.usecases.book.BookModelOutPut;
 import com.inktrack.core.usecases.book.CreateBookUseCase;
+import com.inktrack.core.usecases.book.UpdateBookUseCase;
 import com.inktrack.infrastructure.dtos.book.BookCreateRequest;
 import com.inktrack.infrastructure.dtos.book.BookResponse;
 import com.inktrack.infrastructure.entity.UserEntity;
 import com.inktrack.infrastructure.mapper.BookMapper;
 import com.inktrack.infrastructure.mapper.UserMapper;
-import com.inktrack.infrastructure.persistence.BookRepository;
 import com.inktrack.infrastructure.utils.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,15 +27,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookController {
 
   private final CreateBookUseCase createBookUseCase;
+  private final UpdateBookUseCase updateBookUseCase;
   private final BookMapper bookMapper;
   private final UserMapper userMapper;
-  private final BookRepository book;
 
-  public BookController(CreateBookUseCase createBookUseCase, BookMapper bookMapper, UserMapper userMapper, BookRepository book) {
+  public BookController(
+      CreateBookUseCase createBookUseCase,
+      UpdateBookUseCase updateBookUseCase,
+      BookMapper bookMapper,
+      UserMapper userMapper
+  ) {
     this.createBookUseCase = createBookUseCase;
+    this.updateBookUseCase = updateBookUseCase;
     this.bookMapper = bookMapper;
     this.userMapper = userMapper;
-    this.book = book;
   }
 
   @PostMapping
@@ -46,5 +53,18 @@ public class BookController {
     BookResponse response = bookMapper.modelOutPutToResponse(bookSaved);
     ApiResponse<BookResponse> body = ApiResponse.success(response);
     return ResponseEntity.status(HttpStatus.CREATED).body(body);
+  }
+
+  @PutMapping("/{id}")
+  public ResponseEntity<ApiResponse<BookResponse>> update(
+      @PathVariable Long id,
+      @Valid @RequestBody BookCreateRequest request,
+      @AuthenticationPrincipal UserEntity currentUser
+  ) {
+    BookModelInput modelInput = bookMapper.requestDtoToModelInput(request);
+    BookModelOutPut bookUpdated = updateBookUseCase.execute(id, modelInput, currentUser.getId());
+    BookResponse response = bookMapper.modelOutPutToResponse(bookUpdated);
+    ApiResponse<BookResponse> body = ApiResponse.success(response);
+    return ResponseEntity.ok(body);
   }
 }
