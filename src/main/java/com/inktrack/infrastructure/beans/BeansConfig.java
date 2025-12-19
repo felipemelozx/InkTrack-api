@@ -6,13 +6,14 @@ import com.inktrack.core.gateway.PasswordGateway;
 import com.inktrack.core.gateway.UserGateway;
 import com.inktrack.core.usecases.book.CreateBookUseCase;
 import com.inktrack.core.usecases.book.CreateBookUseCaseImpl;
+import com.inktrack.core.usecases.book.UpdateBookUseCase;
+import com.inktrack.core.usecases.book.UpdateBookUseCaseImpl;
 import com.inktrack.core.usecases.user.CreateUserUseCase;
 import com.inktrack.core.usecases.user.CreateUserUseCaseImpl;
 import com.inktrack.core.usecases.user.LoginUseCase;
 import com.inktrack.core.usecases.user.LoginUseCaseImpl;
 import com.inktrack.core.usecases.user.RefreshTokenUseCase;
 import com.inktrack.core.usecases.user.RefreshTokenUseCaseImpl;
-import com.inktrack.infrastructure.mapper.BookMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,8 +37,13 @@ public class BeansConfig {
   }
 
   @Bean
-  public CreateBookUseCase createBookUseCase(BookGateway bookGateway, BookMapper bookMapper) {
-    return new CreateBookUseCaseImpl(bookGateway, bookMapper);
+  public CreateBookUseCase createBookUseCase(BookGateway bookGateway) {
+    return new CreateBookUseCaseImpl(bookGateway);
+  }
+
+  @Bean
+  public UpdateBookUseCase updateBookUseCase(BookGateway bookGateway) {
+    return new UpdateBookUseCaseImpl(bookGateway);
   }
 
   @Bean
