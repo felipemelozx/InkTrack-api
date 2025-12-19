@@ -23,55 +23,55 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class LoginUseCaseImplTest {
 
-    @Mock
-    private UserGateway userGateway;
+  @Mock
+  private UserGateway userGateway;
 
-    @Mock
-    private JwtGateway jwtGateway;
+  @Mock
+  private JwtGateway jwtGateway;
 
-    @Mock
-    private PasswordGateway passwordGateway;
+  @Mock
+  private PasswordGateway passwordGateway;
 
-    private LoginUseCaseImpl loginUseCase;
+  private LoginUseCaseImpl loginUseCase;
 
-    @BeforeEach
-    void setUp() {
-        loginUseCase = new LoginUseCaseImpl(userGateway, jwtGateway, passwordGateway);
-    }
+  @BeforeEach
+  void setUp() {
+    loginUseCase = new LoginUseCaseImpl(userGateway, jwtGateway, passwordGateway);
+  }
 
-    @Test
-    void execute_shouldReturnAuthTokens_whenCredentialsAreValid() {
-        AuthRequest request = new AuthRequest("john@email.com", "StrongP@ss1");
-        User user = new User(UUID.randomUUID(), "John", "john@email.com", "hashed_password", LocalDateTime.now());
+  @Test
+  void execute_shouldReturnAuthTokens_whenCredentialsAreValid() {
+    AuthRequest request = new AuthRequest("john@email.com", "StrongP@ss1");
+    User user = new User(UUID.randomUUID(), "John", "john@email.com", "hashed_password", LocalDateTime.now());
 
-        when(userGateway.findByEmail(request.email())).thenReturn(Optional.of(user));
-        when(passwordGateway.matches(request.passwordRaw(), user.getPassword())).thenReturn(true);
-        when(jwtGateway.generateAccessToken(user.getId())).thenReturn("access_token");
-        when(jwtGateway.generateRefreshToken(user.getId())).thenReturn("refresh_token");
+    when(userGateway.findByEmail(request.email())).thenReturn(Optional.of(user));
+    when(passwordGateway.matches(request.passwordRaw(), user.getPassword())).thenReturn(true);
+    when(jwtGateway.generateAccessToken(user.getId())).thenReturn("access_token");
+    when(jwtGateway.generateRefreshToken(user.getId())).thenReturn("refresh_token");
 
-        AuthTokens tokens = loginUseCase.execute(request);
+    AuthTokens tokens = loginUseCase.execute(request);
 
-        assertNotNull(tokens);
-        assertEquals("access_token", tokens.accessToken());
-        assertEquals("refresh_token", tokens.refreshToken());
-    }
+    assertNotNull(tokens);
+    assertEquals("access_token", tokens.accessToken());
+    assertEquals("refresh_token", tokens.refreshToken());
+  }
 
-    @Test
-    void execute_shouldThrowException_whenUserNotFound() {
-        AuthRequest request = new AuthRequest("john@email.com", "StrongP@ss1");
-        when(userGateway.findByEmail(request.email())).thenReturn(Optional.empty());
+  @Test
+  void execute_shouldThrowException_whenUserNotFound() {
+    AuthRequest request = new AuthRequest("john@email.com", "StrongP@ss1");
+    when(userGateway.findByEmail(request.email())).thenReturn(Optional.empty());
 
-        assertThrows(InvalidCredentialsException.class, () -> loginUseCase.execute(request));
-    }
+    assertThrows(InvalidCredentialsException.class, () -> loginUseCase.execute(request));
+  }
 
-    @Test
-    void execute_shouldThrowException_whenPasswordDoesNotMatch() {
-        AuthRequest request = new AuthRequest("john@email.com", "WrongP@ss1");
-        User user = new User(UUID.randomUUID(), "John", "john@email.com", "hashed_password", LocalDateTime.now());
+  @Test
+  void execute_shouldThrowException_whenPasswordDoesNotMatch() {
+    AuthRequest request = new AuthRequest("john@email.com", "WrongP@ss1");
+    User user = new User(UUID.randomUUID(), "John", "john@email.com", "hashed_password", LocalDateTime.now());
 
-        when(userGateway.findByEmail(request.email())).thenReturn(Optional.of(user));
-        when(passwordGateway.matches(request.passwordRaw(), user.getPassword())).thenReturn(false);
+    when(userGateway.findByEmail(request.email())).thenReturn(Optional.of(user));
+    when(passwordGateway.matches(request.passwordRaw(), user.getPassword())).thenReturn(false);
 
-        assertThrows(InvalidCredentialsException.class, () -> loginUseCase.execute(request));
-    }
+    assertThrows(InvalidCredentialsException.class, () -> loginUseCase.execute(request));
+  }
 }
