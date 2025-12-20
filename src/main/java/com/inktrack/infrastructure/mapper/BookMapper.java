@@ -3,7 +3,7 @@ package com.inktrack.infrastructure.mapper;
 import com.inktrack.core.domain.Book;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.usecases.book.BookModelInput;
-import com.inktrack.core.usecases.book.BookModelOutPut;
+import com.inktrack.core.usecases.book.BookModelOutput;
 import com.inktrack.infrastructure.dtos.book.BookCreateRequest;
 import com.inktrack.infrastructure.dtos.book.BookResponse;
 import com.inktrack.infrastructure.dtos.user.UserResponse;
@@ -83,7 +83,7 @@ public class BookMapper {
         .build();
   }
 
-  public BookResponse modelOutPutToResponse(BookModelOutPut bookModelOutPut) {
+  public BookResponse modelOutPutToResponse(BookModelOutput bookModelOutPut) {
     UserResponse userResponse =
         userMapper.userDomainToResponse(bookModelOutPut.user());
 
