@@ -54,7 +54,7 @@ class CreateBookUseCaseImplTest {
           .build();
     });
 
-    BookModelOutPut response = createBookUseCase.execute(input, validUser);
+    BookModelOutput response = createBookUseCase.execute(input, validUser);
 
     assertNotNull(response);
     assertEquals(1L, response.id());

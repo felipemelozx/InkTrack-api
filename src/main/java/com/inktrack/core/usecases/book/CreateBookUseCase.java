@@ -4,5 +4,5 @@ import com.inktrack.core.domain.User;
 
 public interface CreateBookUseCase {
 
-  BookModelOutPut execute(BookModelInput modelInput, User currentUser);
+  BookModelOutput execute(BookModelInput modelInput, User currentUser);
 }

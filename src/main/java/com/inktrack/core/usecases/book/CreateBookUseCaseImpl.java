@@ -13,7 +13,7 @@ public class CreateBookUseCaseImpl implements CreateBookUseCase {
   }
 
   @Override
-  public BookModelOutPut execute(BookModelInput modelInput, User currentUser) {
+  public BookModelOutput execute(BookModelInput modelInput, User currentUser) {
     if (currentUser == null) {
       throw new IllegalArgumentException("User not logged in");
     }
@@ -33,7 +33,7 @@ public class CreateBookUseCaseImpl implements CreateBookUseCase {
         .build();
 
     Book bookSaved = bookGateway.save(book);
-    return new BookModelOutPut(
+    return new BookModelOutput(
         bookSaved.getId(),
         bookSaved.getUser(),
         bookSaved.getTitle(),

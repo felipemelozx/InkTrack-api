@@ -15,7 +15,7 @@ public class UpdateBookUseCaseImpl implements UpdateBookUseCase{
   }
 
   @Override
-  public BookModelOutPut execute(Long id, BookModelInput modelInput, UUID userId) {
+  public BookModelOutput execute(Long id, BookModelInput modelInput, UUID userId) {
     Book book = bookGateway.findByIdAndUserId(id, userId);
 
     Book bookUpdated = Book.builder()
@@ -30,7 +30,7 @@ public class UpdateBookUseCaseImpl implements UpdateBookUseCase{
         .build();
 
     Book savedBook = bookGateway.update(bookUpdated);
-    return new BookModelOutPut(
+    return new BookModelOutput(
         savedBook.getId(),
         savedBook.getUser(),
         savedBook.getTitle(),

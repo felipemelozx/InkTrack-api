@@ -4,7 +4,7 @@ import com.inktrack.core.domain.User;
 
 import java.time.OffsetDateTime;
 
-public record BookModelOutPut(
+public record BookModelOutput(
     Long id,
     User user,
     String title,

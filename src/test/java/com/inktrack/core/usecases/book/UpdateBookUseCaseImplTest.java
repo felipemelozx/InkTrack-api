@@ -71,7 +71,7 @@ class UpdateBookUseCaseImplTest {
           .build();
     });
 
-    BookModelOutPut response = updateBookUseCase.execute(bookSaved.getId(), input, validUser.getId());
+    BookModelOutput response = updateBookUseCase.execute(bookSaved.getId(), input, validUser.getId());
 
     assertNotNull(response);
     assertEquals(1L, response.id());
