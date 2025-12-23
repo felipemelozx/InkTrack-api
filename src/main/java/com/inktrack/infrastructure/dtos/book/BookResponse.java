@@ -11,6 +11,7 @@ public record BookResponse(
     String author,
     int totalPages,
     int pagesRead,
+    int progress,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt
 ) {

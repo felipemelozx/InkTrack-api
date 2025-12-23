@@ -59,8 +59,7 @@ public class BookMapper {
   }
 
   public BookResponse domainToResponse(Book book) {
-    UserResponse userResponse =
-        userMapper.userDomainToResponse(book.getUser());
+    UserResponse userResponse = userMapper.userDomainToResponse(book.getUser());
 
     return new BookResponse(
         book.getId(),
@@ -69,6 +68,7 @@ public class BookMapper {
         book.getAuthor(),
         book.getTotalPages(),
         book.getPagesRead(),
+        book.getProgress(),
         book.getCreatedAt(),
         book.getUpdatedAt()
     );
@@ -85,7 +85,7 @@ public class BookMapper {
 
   public BookResponse modelOutPutToResponse(BookModelOutput bookModelOutPut) {
     UserResponse userResponse =
-        userMapper.userDomainToResponse(bookModelOutPut.user());
+        userMapper.userOutputToResponse(bookModelOutPut.user());
 
     return new BookResponse(
         bookModelOutPut.id(),
@@ -94,6 +94,7 @@ public class BookMapper {
         bookModelOutPut.author(),
         bookModelOutPut.totalPages(),
         bookModelOutPut.pagesRead(),
+        bookModelOutPut.progress(),
         bookModelOutPut.createdAt(),
         bookModelOutPut.updatedAt()
     );

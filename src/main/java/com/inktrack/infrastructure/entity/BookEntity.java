@@ -42,6 +42,9 @@ public class BookEntity {
   @Column(name = "created_at", nullable = false)
   private OffsetDateTime createdAt;
 
+  @Column(nullable = false)
+  private Integer progress;
+
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
 
@@ -56,6 +59,7 @@ public class BookEntity {
     this.author = builder.author;
     this.totalPages = builder.totalPages;
     this.pagesRead = builder.pagesRead;
+    this.progress = builder.progress;
     this.createdAt = builder.createdAt;
     this.updatedAt = builder.updatedAt;
   }
@@ -64,6 +68,10 @@ public class BookEntity {
   protected void onCreate() {
     this.createdAt = OffsetDateTime.now();
     this.updatedAt = OffsetDateTime.now();
+
+    if (this.progress == null) {
+      this.progress = 0;
+    }
   }
 
   @PreUpdate
@@ -83,6 +91,7 @@ public class BookEntity {
     private String author;
     private Integer totalPages;
     private Integer pagesRead;
+    private Integer progress;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -118,6 +127,11 @@ public class BookEntity {
       return this;
     }
 
+    public Builder progress(Integer progress) {
+      this.progress = progress;
+      return this;
+    }
+
     public Builder createdAt(OffsetDateTime createdAt) {
       this.createdAt = createdAt;
       return this;
@@ -132,6 +146,12 @@ public class BookEntity {
       if (user == null || title == null || author == null || totalPages <= 0) {
         throw new IllegalStateException("User, title and author are required");
       }
+
+      if (progress != null && (progress < 0 || progress > 100)) {
+        throw new IllegalStateException("Progress must be between 0 and 100");
+      }
+
+
       return new BookEntity(this);
     }
   }
@@ -158,6 +178,10 @@ public class BookEntity {
 
   public Integer getPagesRead() {
     return pagesRead;
+  }
+
+  public Integer getProgress() {
+    return progress;
   }
 
   public OffsetDateTime getCreatedAt() {

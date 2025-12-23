@@ -3,6 +3,7 @@ package com.inktrack.core.usecases.book;
 import com.inktrack.core.domain.Book;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.gateway.BookGateway;
+import com.inktrack.core.usecases.user.UserOutput;
 
 public class CreateBookUseCaseImpl implements CreateBookUseCase {
 
@@ -33,13 +34,20 @@ public class CreateBookUseCaseImpl implements CreateBookUseCase {
         .build();
 
     Book bookSaved = bookGateway.save(book);
+    UserOutput userOutput = new UserOutput(
+        bookSaved.getUser().getId(),
+        bookSaved.getUser().getName(),
+        bookSaved.getUser().getEmail(),
+        bookSaved.getUser().getCreatedAt()
+    );
     return new BookModelOutput(
         bookSaved.getId(),
-        bookSaved.getUser(),
+        userOutput,
         bookSaved.getTitle(),
         bookSaved.getAuthor(),
         bookSaved.getTotalPages(),
         bookSaved.getPagesRead(),
+        bookSaved.getProgress(),
         bookSaved.getCreatedAt(),
         bookSaved.getUpdatedAt()
     );
