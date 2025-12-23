@@ -5,6 +5,7 @@ import java.util.Objects;
 
 public final class Book {
 
+
   private final Long id;
   private final User user;
   private final String title;
@@ -34,9 +35,55 @@ public final class Book {
     if (builder.pagesRead < 0 || builder.pagesRead > builder.totalPages) {
       throw new IllegalArgumentException("pagesRead must be between 0 and totalPages");
     }
+
     Objects.requireNonNull(builder.user, "user must not be null");
     Objects.requireNonNull(builder.title, "title must not be null");
     Objects.requireNonNull(builder.author, "author must not be null");
+  }
+
+
+  public void updatePagesRead(int newValue) {
+    if (newValue < 0 || newValue > totalPages) {
+      throw new IllegalArgumentException("pagesRead must be between 0 and totalPages");
+    }
+    this.pagesRead = newValue;
+    this.updatedAt = OffsetDateTime.now();
+  }
+
+  public int getProgress() {
+    return (pagesRead * 100) / totalPages;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public User getUser() {
+    return user;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public String getAuthor() {
+    return author;
+  }
+
+  public int getTotalPages() {
+    return totalPages;
+  }
+
+  public int getPagesRead() {
+    return pagesRead;
+  }
+
+  public OffsetDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public OffsetDateTime getUpdatedAt() {
+    return updatedAt;
   }
 
   public static Builder builder() {
@@ -54,7 +101,8 @@ public final class Book {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
-    private Builder() {}
+    private Builder() {
+    }
 
     public Builder id(Long id) {
       this.id = id;
@@ -99,45 +147,5 @@ public final class Book {
     public Book build() {
       return new Book(this);
     }
-  }
-
-  public void updatePagesRead(int newValue) {
-    if (newValue < 0 || newValue > totalPages) {
-      throw new IllegalArgumentException("pagesRead must be between 0 and totalPages");
-    }
-    this.pagesRead = newValue;
-    this.updatedAt = OffsetDateTime.now();
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public User getUser() {
-    return user;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public String getAuthor() {
-    return author;
-  }
-
-  public int getTotalPages() {
-    return totalPages;
-  }
-
-  public int getPagesRead() {
-    return pagesRead;
-  }
-
-  public OffsetDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public OffsetDateTime getUpdatedAt() {
-    return updatedAt;
   }
 }

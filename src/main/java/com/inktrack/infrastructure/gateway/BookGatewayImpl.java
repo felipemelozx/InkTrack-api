@@ -3,11 +3,17 @@ package com.inktrack.infrastructure.gateway;
 import com.inktrack.core.domain.Book;
 import com.inktrack.core.exception.BookNotFoundException;
 import com.inktrack.core.gateway.BookGateway;
+import com.inktrack.core.usecases.book.GetBookFilter;
+import com.inktrack.core.usecases.book.OrderEnum;
 import com.inktrack.infrastructure.entity.BookEntity;
 import com.inktrack.infrastructure.mapper.BookMapper;
 import com.inktrack.infrastructure.persistence.BookRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,4 +48,31 @@ public class BookGatewayImpl implements BookGateway {
   public Book update(Book bookUpdated) {
     return save(bookUpdated);
   }
+
+  @Override
+  public List<Book> getUserBooksPage(UUID userId, GetBookFilter filter) {
+    Sort sort = Sort.by(
+        filter.orderEnum().getDirection() == OrderEnum.Direction.ASC
+            ? Sort.Direction.ASC
+            : Sort.Direction.DESC,
+        filter.orderEnum().getField()
+    );
+
+    Pageable pageable = PageRequest.of(
+        filter.page(),
+        filter.size(),
+        sort
+    );
+
+    return bookRepository.getUserBookPage(userId, filter.title(), pageable)
+        .stream()
+        .map(bookMapper::entityToDomain)
+        .toList();
+  }
+
+  @Override
+  public long countUserBooks(UUID userId) {
+    return bookRepository.countUserBooks(userId);
+  }
+
 }
