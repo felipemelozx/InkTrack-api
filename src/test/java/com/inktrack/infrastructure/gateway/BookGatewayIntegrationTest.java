@@ -4,6 +4,8 @@ import com.inktrack.InkTrackApplication;
 import com.inktrack.core.domain.Book;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.exception.BookNotFoundException;
+import com.inktrack.core.usecases.book.GetBookFilter;
+import com.inktrack.core.usecases.book.OrderEnum;
 import com.inktrack.infrastructure.entity.BookEntity;
 import com.inktrack.infrastructure.entity.UserEntity;
 import com.inktrack.infrastructure.mapper.BookMapper;
@@ -18,10 +20,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = InkTrackApplication.class)
 @ActiveProfiles("test")
@@ -163,5 +169,66 @@ class BookGatewayIntegrationTest {
 
     assertTrue(entityInDb.isPresent());
     assertEquals(120, entityInDb.get().getPagesRead());
+  }
+
+  @Test
+  void shouldReturnUserBooksPageWithPaginationAndSorting() {
+    createAndSaveBook("Algoritmos", 100);
+    createAndSaveBook("Clean Architecture", 200);
+    createAndSaveBook("Banco de Dados", 150);
+
+    OrderEnum order = OrderEnum.TITLE_ASC;
+    GetBookFilter filter = new GetBookFilter(0, 2, "", order);
+
+    List<Book> result = bookGateway.getUserBooksPage(savedUser.getId(), filter);
+
+    assertEquals(2, result.size(), "Deve retornar apenas 2 livros (limite da página)");
+    assertEquals("Algoritmos", result.get(0).getTitle(), "Primeiro deve ser 'Algoritmos' (Ordem alfabética)");
+    assertEquals("Banco de Dados", result.get(1).getTitle(), "Segundo deve ser 'Banco de Dados'");
+  }
+
+
+  @Test
+  void shouldReturnUserBooksPageWithPaginationAndSortingWithSortByTitleDesc() {
+    createAndSaveBook("Algoritmos", 100);
+    createAndSaveBook("Clean Architecture", 200);
+    createAndSaveBook("Banco de Dados", 150);
+
+    OrderEnum order = OrderEnum.TITLE_DESC;
+    GetBookFilter filter = new GetBookFilter(0, 2, "", order);
+
+    List<Book> result = bookGateway.getUserBooksPage(savedUser.getId(), filter);
+
+    assertEquals(2, result.size(), "Deve retornar apenas 2 livros (limite da página)");
+    assertEquals("Clean Architecture", result.get(0).getTitle(), "Primeiro deve ser 'Algoritmos' (Ordem alfabética)");
+    assertEquals("Banco de Dados", result.get(1).getTitle(), "Segundo deve ser 'Banco de Dados'");
+  }
+
+  @Test
+  void shouldCountUserBooks() {
+    createAndSaveBook("Book 1", 100);
+    createAndSaveBook("Book 2", 100);
+    createAndSaveBook("Book 3", 100);
+
+    User otherUser = userMapper.entityToDomain(
+        userRepository.save(new UserEntity(null, "Other", "other@mail.com", "SomePassword132#"))
+    );
+    Book otherBook = Book.builder()
+        .user(otherUser).title("Other Book").author("X").totalPages(10).build();
+    bookGateway.save(otherBook);
+
+    long count = bookGateway.countUserBooks(savedUser.getId());
+
+    assertEquals(3, count, "Deve contar apenas os livros do usuário logado");
+  }
+
+  private void createAndSaveBook(String title, int pages) {
+    Book book = Book.builder()
+        .user(savedUser)
+        .title(title)
+        .author("Test Author")
+        .totalPages(pages)
+        .build();
+    bookGateway.save(book);
   }
 }

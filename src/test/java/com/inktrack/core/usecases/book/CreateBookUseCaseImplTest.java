@@ -14,9 +14,13 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CreateBookUseCaseImplTest {
@@ -99,6 +103,25 @@ class CreateBookUseCaseImplTest {
     );
 
     assertEquals("The title and author not can be black or null.", exception.getMessage());
+    verifyNoInteractions(bookGateway);
+  }
+
+  @Test
+  @DisplayName("Should throw exception when total pages is negative")
+  void execute_shouldThrowException_whenTotalPagesIsNegative() {
+    BookModelInput input =
+        new BookModelInput("Clean Code", "Robert C. Martin", -1);
+
+    IllegalArgumentException exception = assertThrows(
+        IllegalArgumentException.class,
+        () -> createBookUseCase.execute(input, validUser)
+    );
+
+    assertEquals(
+        "The total pages must be greater than zero.",
+        exception.getMessage()
+    );
+
     verifyNoInteractions(bookGateway);
   }
 }
