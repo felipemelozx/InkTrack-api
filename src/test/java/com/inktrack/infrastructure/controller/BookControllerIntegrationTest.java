@@ -23,9 +23,11 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -85,6 +87,29 @@ class BookControllerIntegrationTest {
         .asText();
   }
 
+  private void createBook(String token, BookCreateRequest request) throws Exception {
+    mockMvc.perform(post("/books")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.data.id").isNotEmpty())
+        .andExpect(jsonPath("$.data.title").value(request.title()))
+        .andExpect(jsonPath("$.data.author").value(request.author()))
+        .andExpect(jsonPath("$.data.totalPages").value(request.totalPages()));
+  }
+
+  private void createBook(String token, String title) throws Exception {
+    BookCreateRequest request =
+        new BookCreateRequest(title, "Robert C. Martin", 464);
+
+    mockMvc.perform(post("/books")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isCreated());
+  }
+
   @Test
   @DisplayName("Should create book successfully when authenticated and data is valid")
   void shouldCreateBookSuccessfully() throws Exception {
@@ -92,15 +117,7 @@ class BookControllerIntegrationTest {
 
     BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
 
-    mockMvc.perform(post("/books")
-            .header("Authorization", "Bearer " + token)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.data.id").value(notNullValue()))
-        .andExpect(jsonPath("$.data.title").value("Clean Code"))
-        .andExpect(jsonPath("$.data.author").value("Robert C. Martin"))
-        .andExpect(jsonPath("$.data.totalPages").value(464));
+    createBook(token, request);
 
     var books = bookRepository.findAll();
     assert books.size() == 1;
@@ -153,15 +170,7 @@ class BookControllerIntegrationTest {
 
     BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
 
-    mockMvc.perform(post("/books")
-            .header("Authorization", "Bearer " + token)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.data.id").value(notNullValue()))
-        .andExpect(jsonPath("$.data.title").value("Clean Code"))
-        .andExpect(jsonPath("$.data.author").value("Robert C. Martin"))
-        .andExpect(jsonPath("$.data.totalPages").value(464));
+    createBook(token, request);
 
     List<BookEntity> books = bookRepository.findAll();
     assert books.size() == 1;
@@ -194,15 +203,7 @@ class BookControllerIntegrationTest {
     UUID userId = userRepository.findAll().get(0).getId();
     BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
 
-    mockMvc.perform(post("/books")
-            .header("Authorization", "Bearer " + token)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.data.id").value(notNullValue()))
-        .andExpect(jsonPath("$.data.title").value("Clean Code"))
-        .andExpect(jsonPath("$.data.author").value("Robert C. Martin"))
-        .andExpect(jsonPath("$.data.totalPages").value(464));
+    createBook(token, request);
 
     List<BookEntity> books = bookRepository.findAll();
     assert books.size() == 1;
@@ -227,5 +228,100 @@ class BookControllerIntegrationTest {
     assert books.get(0).getTitle().equals(request.title());
     assert books.get(0).getAuthor().equals(request.author());
     assert books.get(0).getTotalPages().equals(request.totalPages());
+  }
+
+  @Test
+  @DisplayName("Should return books with default pagination and sorting")
+  void shouldReturnBooksWithDefaultFilters() throws Exception {
+    String token = authenticateAndGetToken();
+    BookCreateRequest request =
+        new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
+
+    createBook(token, request);
+    createBook(token, request);
+
+    mockMvc.perform(get("/books")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").isNotEmpty())
+        .andExpect(jsonPath("$.data.pageSize").value(10))
+        .andExpect(jsonPath("$.data.totalPages").value(1))
+        .andExpect(jsonPath("$.data.currentPage").value(0));
+
+    List<BookEntity> books = bookRepository.findAll();
+
+    assertThat(books)
+        .hasSize(2)
+        .allSatisfy(book -> {
+          assertThat(book.getTitle()).isEqualTo(request.title());
+          assertThat(book.getAuthor()).isEqualTo(request.author());
+          assertThat(book.getTotalPages()).isEqualTo(request.totalPages());
+        });
+  }
+
+  @DisplayName("Should filter books by title")
+  void shouldFilterBooksByTitle() throws Exception {
+    // Arrange
+    String token = authenticateAndGetToken();
+
+    createBook(token, "Clean Code");
+    createBook(token, "Domain Driven Design");
+
+    // Act & Assert
+    mockMvc.perform(get("/books")
+            .param("title", "Clean")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.data.length()").value(1))
+        .andExpect(jsonPath("$.data.data[0].title").value("Clean Code"));
+  }
+
+  @Test
+  @DisplayName("Should return books ordered by most recent")
+  void shouldReturnBooksOrderedByRecent() throws Exception {
+    String token = authenticateAndGetToken();
+
+    createBook(token, "Book 1");
+    createBook(token, "Book 2");
+
+    mockMvc.perform(get("/books")
+            .param("sortBy", "RECENT")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.data[0].title").value("Book 2"));
+  }
+
+  @Test
+  @DisplayName("Should return books ordered by oldest")
+  void shouldReturnBooksOrderedByOldest() throws Exception {
+    String token = authenticateAndGetToken();
+
+    createBook(token, "Book 1");
+    createBook(token, "Book 2");
+
+    mockMvc.perform(get("/books")
+            .param("sortBy", "OLDEST")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.data[0].title").value("Book 1"));
+  }
+
+  @Test
+  @DisplayName("Should return paginated books")
+  void shouldReturnPaginatedBooks() throws Exception {
+    String token = authenticateAndGetToken();
+
+    createBook(token, "Book 1");
+    createBook(token, "Book 2");
+    createBook(token, "Book 3");
+
+    mockMvc.perform(get("/books")
+            .param("page", "0")
+            .param("size", "2")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.data.length()").value(2))
+        .andExpect(jsonPath("$.data.totalPages").value(2));
   }
 }
