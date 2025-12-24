@@ -5,6 +5,7 @@ import com.inktrack.InkTrackApplication;
 import com.inktrack.infrastructure.dtos.book.BookCreateRequest;
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
 import com.inktrack.infrastructure.dtos.user.LoginRequest;
+import com.inktrack.infrastructure.entity.BookEntity;
 import com.inktrack.infrastructure.persistence.BookRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-
+import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.notNullValue;
@@ -162,7 +163,7 @@ class BookControllerIntegrationTest {
         .andExpect(jsonPath("$.data.author").value("Robert C. Martin"))
         .andExpect(jsonPath("$.data.totalPages").value(464));
 
-    var books = bookRepository.findAll();
+    List<BookEntity> books = bookRepository.findAll();
     assert books.size() == 1;
     assert books.get(0).getTitle().equals("Clean Code");
 
@@ -180,11 +181,10 @@ class BookControllerIntegrationTest {
         .andExpect(jsonPath("$.data.totalPages").value(updateRequest.totalPages()));
 
 
-    books = bookRepository.findAll();
-    assert books.size() == 1;
-    assert books.get(0).getTitle().equals(updateRequest.title());
-    assert books.get(0).getAuthor().equals(updateRequest.author());
-    assert books.get(0).getTotalPages().equals(updateRequest.totalPages());
+    var book = bookRepository.findById(bookId);
+    assert book.get().getTitle().equals(updateRequest.title());
+    assert book.get().getAuthor().equals(updateRequest.author());
+    assert book.get().getTotalPages().equals(updateRequest.totalPages());
   }
 
   @Test
@@ -204,7 +204,7 @@ class BookControllerIntegrationTest {
         .andExpect(jsonPath("$.data.author").value("Robert C. Martin"))
         .andExpect(jsonPath("$.data.totalPages").value(464));
 
-    var books = bookRepository.findAll();
+    List<BookEntity> books = bookRepository.findAll();
     assert books.size() == 1;
     assert books.get(0).getTitle().equals("Clean Code");
 

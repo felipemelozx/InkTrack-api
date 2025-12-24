@@ -5,7 +5,6 @@ import java.util.Objects;
 
 public final class Book {
 
-
   private final Long id;
   private final User user;
   private final String title;
