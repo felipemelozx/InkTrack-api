@@ -68,10 +68,6 @@ public class BookEntity {
   protected void onCreate() {
     this.createdAt = OffsetDateTime.now();
     this.updatedAt = OffsetDateTime.now();
-
-    if (this.progress == null) {
-      this.progress = 0;
-    }
   }
 
   @PreUpdate
@@ -150,7 +146,6 @@ public class BookEntity {
       if (progress != null && (progress < 0 || progress > 100)) {
         throw new IllegalStateException("Progress must be between 0 and 100");
       }
-
 
       return new BookEntity(this);
     }

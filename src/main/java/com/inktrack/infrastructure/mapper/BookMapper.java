@@ -30,6 +30,7 @@ public class BookMapper {
         .author(book.getAuthor())
         .totalPages(book.getTotalPages())
         .pagesRead(book.getPagesRead())
+        .progress(book.getProgress())
         .createdAt(book.getCreatedAt())
         .updatedAt(book.getUpdatedAt())
         .build();
