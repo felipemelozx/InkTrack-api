@@ -120,7 +120,7 @@ jobs:
 
       - name: Deploy with Docker Compose (no downtime)
         run: |
-          APP_DIR="/opt/${{ env.APP_NAME }}"
+          APP_DIR="$HOME/app/${{ env.APP_NAME }}"
           mkdir -p $APP_DIR
           cp docker-compose.prod.yaml $APP_DIR/docker-compose.prod.yaml
 
