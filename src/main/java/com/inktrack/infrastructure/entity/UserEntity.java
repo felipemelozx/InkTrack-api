@@ -46,6 +46,12 @@ public class UserEntity {
     this.password = password;
   }
 
+
+  public UserEntity(UUID id, String name, String email, String password, LocalDateTime createdAt) {
+   this(id, name, email, password);
+   this.createdAt = createdAt;
+  }
+
   public UUID getId() {
     return id;
   }

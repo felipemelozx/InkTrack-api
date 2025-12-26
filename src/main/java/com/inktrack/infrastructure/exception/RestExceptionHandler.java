@@ -1,5 +1,6 @@
 package com.inktrack.infrastructure.exception;
 
+import com.inktrack.core.exception.BookNotFoundException;
 import com.inktrack.core.exception.EmailAlreadyExistsException;
 import com.inktrack.core.exception.EmailNotFoundException;
 import com.inktrack.core.exception.FieldDomainValidationException;
@@ -137,6 +138,19 @@ public class RestExceptionHandler {
     return new ResponseEntity<>(
         ApiResponse.failure(List.of(error), "Invalid or expired token"),
         HttpStatus.UNAUTHORIZED
+    );
+  }
+
+  @ExceptionHandler(BookNotFoundException.class)
+  public ResponseEntity<ApiResponse<CustomFieldError>> handleBookNotFoundException(
+      BookNotFoundException ex
+  ) {
+    return new ResponseEntity<>(
+        ApiResponse.failure(
+            List.of(new CustomFieldError(ex.getFieldName(), ex.getMessage())),
+            "Book not found for this book id: " + ex.getFieldName()
+        ),
+        HttpStatus.NOT_FOUND
     );
   }
 }

@@ -4,22 +4,24 @@ import com.inktrack.InkTrackApplication;
 import com.inktrack.core.domain.User;
 import com.inktrack.infrastructure.entity.UserEntity;
 import com.inktrack.infrastructure.mapper.UserMapper;
+import com.inktrack.infrastructure.persistence.BookRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = InkTrackApplication.class)
 @ActiveProfiles("test")
-@Transactional
 class UserGatewayIntegrationTest {
 
     @Autowired
@@ -28,13 +30,21 @@ class UserGatewayIntegrationTest {
     @Autowired
     private UserMapper userMapper;
 
-    private UserGatewayImp userGateway;
+  @Autowired
+  private BookRepository bookRepository;
+
+    private UserGatewayImpl userGateway;
 
     @BeforeEach
     void setUp() {
-        userGateway = new UserGatewayImp(userRepository, userMapper);
-        userRepository.deleteAll();
+        userGateway = new UserGatewayImpl(userRepository, userMapper);
     }
+
+  @BeforeEach
+  void cleanDatabase() {
+    bookRepository.deleteAllInBatch();
+    userRepository.deleteAllInBatch();
+  }
 
     @Test
     void shouldSaveUserAndRetrieveByEmail() {

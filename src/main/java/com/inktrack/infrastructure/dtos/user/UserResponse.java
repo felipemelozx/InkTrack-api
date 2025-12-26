@@ -3,7 +3,7 @@ package com.inktrack.infrastructure.dtos.user;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record CreateUserResponse(
+public record UserResponse(
     UUID id,
     String name,
     String email,
