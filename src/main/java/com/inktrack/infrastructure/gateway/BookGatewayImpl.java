@@ -8,6 +8,7 @@ import com.inktrack.core.usecases.book.OrderEnum;
 import com.inktrack.infrastructure.entity.BookEntity;
 import com.inktrack.infrastructure.mapper.BookMapper;
 import com.inktrack.infrastructure.persistence.BookRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,6 +30,7 @@ public class BookGatewayImpl implements BookGateway {
   }
 
   @Override
+  @Transactional
   public Book save(Book book) {
     BookEntity bookEntity = bookMapper.domainToEntity(book);
     BookEntity savedBookEntity = bookRepository.save(bookEntity);
@@ -45,6 +47,7 @@ public class BookGatewayImpl implements BookGateway {
   }
 
   @Override
+  @Transactional
   public Book update(Book bookUpdated) {
     return save(bookUpdated);
   }
@@ -75,4 +78,10 @@ public class BookGatewayImpl implements BookGateway {
     return bookRepository.countUserBooks(userId);
   }
 
+  @Override
+  @Transactional
+  public boolean deleteByIdAndUserId(Long bookId, UUID userId) {
+    int linesAffected = bookRepository.deleteByIdAndUserId(bookId, userId);
+    return linesAffected > 0;
+  }
 }
