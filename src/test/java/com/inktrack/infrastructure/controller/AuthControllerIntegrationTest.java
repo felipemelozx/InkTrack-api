@@ -1,5 +1,7 @@
 package com.inktrack.infrastructure.controller;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inktrack.InkTrackApplication;
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
@@ -16,6 +18,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Date;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -226,5 +230,26 @@ class AuthControllerIntegrationTest {
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.errors[0].field").value("token"))
         .andExpect(jsonPath("$.message").value("Invalid token format"));
+  }
+
+  @Test
+  void shouldReturnUnauthorizedWhenTokenFailsSignatureVerification() throws Exception {
+    Algorithm wrongAlgorithm = Algorithm.HMAC256("wrong-secret");
+
+    String fakeValidToken = JWT.create()
+        .withSubject("123")
+        .withClaim("type", "refresh")
+        .withExpiresAt(new Date(System.currentTimeMillis() + 10000))
+        .sign(wrongAlgorithm);
+
+    RefreshTokenRequest request = new RefreshTokenRequest(fakeValidToken);
+
+    mockMvc.perform(post("/auth/refresh")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.message").value("Invalid or expired token"))
+        .andExpect(jsonPath("$.errors[0].field").value("token"))
+        .andExpect(jsonPath("$.errors[0].message").value("Invalid or expired token"));
   }
 }

@@ -1,4 +1,4 @@
-package com.inktrack.infrastructure.security;
+package com.inktrack.infrastructure.gateway;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -41,6 +41,8 @@ public class JwtGatewayImpl implements JwtGateway {
         .withIssuer("Ink-auth-security")
         .withSubject(userId.toString())
         .withClaim("token_type", type)
+        .withAudience("inktrack-api")
+        .withJWTId(UUID.randomUUID().toString())
         .withExpiresAt(expiresAt)
         .sign(algorithm);
   }

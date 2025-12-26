@@ -4,7 +4,7 @@ import com.inktrack.core.domain.User;
 import com.inktrack.core.usecases.user.AuthRequest;
 import com.inktrack.core.usecases.user.CreateUserRequestModel;
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
-import com.inktrack.infrastructure.dtos.user.CreateUserResponse;
+import com.inktrack.infrastructure.dtos.user.UserResponse;
 import com.inktrack.infrastructure.dtos.user.LoginRequest;
 import com.inktrack.infrastructure.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,9 +63,9 @@ class UserMapperTest {
     }
 
     @Test
-    void userDomainToCreateResponse_shouldMapCorrectly() {
+    void userDomainToResponse_shouldMapCorrectly() {
         User user = new User(UUID.randomUUID(), "John", "john@email.com", "hashed_pass", LocalDateTime.now());
-        CreateUserResponse response = userMapper.userDomainToCreateResponse(user);
+        UserResponse response = userMapper.userDomainToResponse(user);
 
         assertNotNull(response);
         assertEquals(user.getId(), response.id());
