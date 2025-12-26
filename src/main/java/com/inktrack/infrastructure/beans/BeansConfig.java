@@ -6,6 +6,8 @@ import com.inktrack.core.gateway.PasswordGateway;
 import com.inktrack.core.gateway.UserGateway;
 import com.inktrack.core.usecases.book.CreateBookUseCase;
 import com.inktrack.core.usecases.book.CreateBookUseCaseImpl;
+import com.inktrack.core.usecases.book.DeleteBookUseCase;
+import com.inktrack.core.usecases.book.DeleteBookUseCaseImpl;
 import com.inktrack.core.usecases.book.GetBooksUseCase;
 import com.inktrack.core.usecases.book.GetBooksUseCaseImpl;
 import com.inktrack.core.usecases.book.UpdateBookUseCase;
@@ -51,6 +53,11 @@ public class BeansConfig {
   @Bean
   public GetBooksUseCase getBooksUseCase(BookGateway bookGateway) {
     return new GetBooksUseCaseImpl(bookGateway);
+  }
+
+  @Bean
+  public DeleteBookUseCase deleteBookUseCase(BookGateway bookGateway) {
+    return new DeleteBookUseCaseImpl(bookGateway);
   }
 
   @Bean
