@@ -142,5 +142,5 @@ jobs:
           chmod 600 $APP_DIR/.env
           cd $APP_DIR
 
-          docker compose pull app
-          docker compose up -d --no-deps --force-recreate app
+          docker compose -f docker-compose.prod.yaml pull app
+          docker compose -f docker-compose.prod.yaml up -d --no-deps --force-recreate app
