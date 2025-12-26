@@ -5,6 +5,7 @@ import com.inktrack.core.usecases.book.BookModelInput;
 import com.inktrack.core.usecases.book.BookModelOutput;
 import com.inktrack.core.usecases.book.CreateBookUseCase;
 import com.inktrack.core.usecases.book.DeleteBookUseCase;
+import com.inktrack.core.usecases.book.GetBookByIdUseCase;
 import com.inktrack.core.usecases.book.GetBookFilter;
 import com.inktrack.core.usecases.book.GetBooksUseCase;
 import com.inktrack.core.usecases.book.OrderEnum;
@@ -39,6 +40,7 @@ public class BookController {
   private final CreateBookUseCase createBookUseCase;
   private final UpdateBookUseCase updateBookUseCase;
   private final GetBooksUseCase getBooksUseCase;
+  private final GetBookByIdUseCase getBookByIdUseCase;
   private final DeleteBookUseCase deleteBookUseCase;
   private final BookMapper bookMapper;
   private final UserMapper userMapper;
@@ -46,13 +48,16 @@ public class BookController {
   public BookController(
       CreateBookUseCase createBookUseCase,
       UpdateBookUseCase updateBookUseCase,
-      GetBooksUseCase getBooksUseCase, DeleteBookUseCase deleteBookUseCase,
+      GetBooksUseCase getBooksUseCase,
+      GetBookByIdUseCase getBookByIdUseCase,
+      DeleteBookUseCase deleteBookUseCase,
       BookMapper bookMapper,
       UserMapper userMapper
   ) {
     this.createBookUseCase = createBookUseCase;
     this.updateBookUseCase = updateBookUseCase;
     this.getBooksUseCase = getBooksUseCase;
+    this.getBookByIdUseCase = getBookByIdUseCase;
     this.deleteBookUseCase = deleteBookUseCase;
     this.bookMapper = bookMapper;
     this.userMapper = userMapper;
@@ -110,6 +115,16 @@ public class BookController {
         bookResponseList
     );
     return ResponseEntity.ok(ApiResponse.success(dataResponse));
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<ApiResponse<BookResponse>> getBookById(
+      @PathVariable Long id,
+      @AuthenticationPrincipal UserEntity currentUser
+  ) {
+    BookModelOutput bookModelOutput = getBookByIdUseCase.execute(id, currentUser.getId());
+    BookResponse response = bookMapper.modelOutPutToResponse(bookModelOutput);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @DeleteMapping("/{id}")
