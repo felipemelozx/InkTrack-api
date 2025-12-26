@@ -25,14 +25,4 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 
 # Run the application
-ENTRYPOINT [
-  "java",
-  "-XX:+UseContainerSupport",
-  "-XX:+UseG1GC",
-  "-XX:MaxGCPauseMillis=300",
-  "-XX:MaxRAMPercentage=70.0",
-  "-XX:InitialRAMPercentage=50.0",
-  "-XX:+ExitOnOutOfMemoryError",
-  "-jar",
-  "app.jar"
-]
+ENTRYPOINT ["java","-XX:+UseContainerSupport","-XX:+UseG1GC","-XX:MaxGCPauseMillis=300","-XX:MaxRAMPercentage=70.0","-XX:InitialRAMPercentage=50.0","-XX:+ExitOnOutOfMemoryError","-jar","app.jar"]
