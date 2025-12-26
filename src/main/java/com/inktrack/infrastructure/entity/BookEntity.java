@@ -39,11 +39,11 @@ public class BookEntity {
   @Column(name = "pages_read", nullable = false)
   private Integer pagesRead;
 
-  @Column(name = "created_at", nullable = false)
-  private OffsetDateTime createdAt;
-
   @Column(nullable = false)
   private Integer progress;
+
+  @Column(name = "created_at", nullable = false)
+  private OffsetDateTime createdAt;
 
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
