@@ -143,4 +143,4 @@ jobs:
           cd $APP_DIR
 
           docker compose -f docker-compose.prod.yaml pull app
-          docker compose -f docker-compose.prod.yaml up -d --no-deps --force-recreate app
+          docker compose -f docker-compose.prod.yaml up -d --no-deps --force-recreate app 
