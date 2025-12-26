@@ -65,28 +65,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-
-      - name: Cache Maven
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven
-
-      - name: Extract version from pom.xml
-        id: version
-        run: |
-          VERSION=$(mvn -q -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec)
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Build application JAR
-        run: mvn clean package -DskipTests
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -103,9 +81,8 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest
-            ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ steps.version.outputs.VERSION }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
           labels: |
-            org.opencontainers.image.version=${{ steps.version.outputs.VERSION }}
             org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -126,6 +103,7 @@ jobs:
 
           cat <<EOF > $APP_DIR/.env
           DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+          APP_NAME=${{ env.APP_NAME }}
           IMAGE_TAG=latest
           APP_PORT=${{ secrets.APP_PORT }}
           SERVER_CONTEXT_PATH=/api/v1
@@ -141,6 +119,47 @@ jobs:
 
           chmod 600 $APP_DIR/.env
           cd $APP_DIR
+          
+          # Subir tudo se o banco não existir
+          if ! docker ps --format '{{.Names}}' | grep -q inktrack-db; then
+            echo "Database not found, starting full stack..."
+            docker compose -f docker-compose.prod.yaml up -d
+          else
+            echo "Database found, updating app only..."
+            docker compose -f docker-compose.prod.yaml pull app
+            docker compose -f docker-compose.prod.yaml up -d --no-deps --force-recreate app
+          fi
 
-          docker compose -f docker-compose.prod.yaml pull app
-          docker compose -f docker-compose.prod.yaml up -d --no-deps --force-recreate app 
+          echo "⏳ Waiting for application health..."
+
+          MAX_WAIT=120
+          SLEEP=5
+          ELAPSED=0
+
+          while true; do
+            STATUS=$(docker inspect \
+              --format='{{.State.Health.Status}}' \
+              inktrack-app 2>/dev/null || echo "starting")
+
+            echo "Health status: $STATUS"
+
+            if [ "$STATUS" = "healthy" ]; then
+              echo "✅ Application is healthy"
+              break
+            fi
+
+            if [ "$STATUS" = "unhealthy" ]; then
+              echo "❌ Application is unhealthy"
+              docker logs inktrack-app
+              exit 1
+            fi
+
+            if [ $ELAPSED -ge $MAX_WAIT ]; then
+              echo "❌ Timeout waiting for application health"
+              docker logs inktrack-app
+              exit 1
+            fi
+
+            sleep $SLEEP
+            ELAPSED=$((ELAPSED + SLEEP))
+          done
