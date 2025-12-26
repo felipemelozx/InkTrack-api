@@ -4,6 +4,7 @@ import com.inktrack.core.domain.User;
 import com.inktrack.core.usecases.book.BookModelInput;
 import com.inktrack.core.usecases.book.BookModelOutput;
 import com.inktrack.core.usecases.book.CreateBookUseCase;
+import com.inktrack.core.usecases.book.DeleteBookUseCase;
 import com.inktrack.core.usecases.book.GetBookFilter;
 import com.inktrack.core.usecases.book.GetBooksUseCase;
 import com.inktrack.core.usecases.book.OrderEnum;
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,27 +39,30 @@ public class BookController {
   private final CreateBookUseCase createBookUseCase;
   private final UpdateBookUseCase updateBookUseCase;
   private final GetBooksUseCase getBooksUseCase;
+  private final DeleteBookUseCase deleteBookUseCase;
   private final BookMapper bookMapper;
   private final UserMapper userMapper;
 
   public BookController(
       CreateBookUseCase createBookUseCase,
       UpdateBookUseCase updateBookUseCase,
-      GetBooksUseCase getBooksUseCase,
+      GetBooksUseCase getBooksUseCase, DeleteBookUseCase deleteBookUseCase,
       BookMapper bookMapper,
       UserMapper userMapper
   ) {
     this.createBookUseCase = createBookUseCase;
     this.updateBookUseCase = updateBookUseCase;
     this.getBooksUseCase = getBooksUseCase;
+    this.deleteBookUseCase = deleteBookUseCase;
     this.bookMapper = bookMapper;
     this.userMapper = userMapper;
   }
 
   @PostMapping
-  public ResponseEntity<ApiResponse<BookResponse>> create(@Valid @RequestBody BookCreateRequest request,
-                                                          @AuthenticationPrincipal UserEntity currentUser) {
-
+  public ResponseEntity<ApiResponse<BookResponse>> create(
+      @Valid @RequestBody BookCreateRequest request,
+      @AuthenticationPrincipal UserEntity currentUser
+  ) {
     BookModelInput modelInput = bookMapper.requestDtoToModelInput(request);
     User userLogged = userMapper.entityToDomain(currentUser);
     BookModelOutput bookSaved = createBookUseCase.execute(modelInput, userLogged);
@@ -105,5 +110,14 @@ public class BookController {
         bookResponseList
     );
     return ResponseEntity.ok(ApiResponse.success(dataResponse));
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<ApiResponse<Void>> delete(
+      @PathVariable Long id,
+      @AuthenticationPrincipal UserEntity currentUser
+  ) {
+    deleteBookUseCase.execute(id, currentUser.getId());
+    return ResponseEntity.noContent().build();
   }
 }
