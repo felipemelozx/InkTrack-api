@@ -17,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
@@ -26,16 +25,19 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = InkTrackApplication.class)
 @ActiveProfiles("test")
-@Transactional
 class BookControllerIntegrationTest {
 
   @Autowired
@@ -60,9 +62,12 @@ class BookControllerIntegrationTest {
 
     objectMapper = new ObjectMapper();
     objectMapper.findAndRegisterModules();
+  }
 
-    bookRepository.deleteAll();
-    userRepository.deleteAll();
+  @BeforeEach
+  void cleanDatabase() {
+    bookRepository.deleteAllInBatch();
+    userRepository.deleteAllInBatch();
   }
 
   private String authenticateAndGetToken() throws Exception {
@@ -99,15 +104,24 @@ class BookControllerIntegrationTest {
         .andExpect(jsonPath("$.data.totalPages").value(request.totalPages()));
   }
 
-  private void createBook(String token, String title) throws Exception {
+  private long createBook(String token, String title) throws Exception {
     BookCreateRequest request =
         new BookCreateRequest(title, "Robert C. Martin", 464);
 
-    mockMvc.perform(post("/books")
+    String createBookResponse = mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isCreated());
+        .andExpect(status().isCreated())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    return objectMapper
+        .readTree(createBookResponse)
+        .get("data")
+        .get("id")
+        .asLong();
   }
 
   @Test
@@ -260,15 +274,14 @@ class BookControllerIntegrationTest {
         });
   }
 
+  @Test
   @DisplayName("Should filter books by title")
   void shouldFilterBooksByTitle() throws Exception {
-    // Arrange
     String token = authenticateAndGetToken();
 
     createBook(token, "Clean Code");
     createBook(token, "Domain Driven Design");
 
-    // Act & Assert
     mockMvc.perform(get("/books")
             .param("title", "Clean")
             .header("Authorization", "Bearer " + token))
@@ -323,5 +336,36 @@ class BookControllerIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.data.length()").value(2))
         .andExpect(jsonPath("$.data.totalPages").value(2));
+  }
+
+  @Test
+  @DisplayName("Should delete book and remove it from database")
+  void shouldDeleteBookWhenBookExists() throws Exception {
+    String token = authenticateAndGetToken();
+
+    Long bookId = createBook(token, "Book 1");
+    assertNotNull(bookId);
+
+    assertTrue(bookRepository.findById(bookId).isPresent());
+
+    mockMvc.perform(delete("/books/{id}", bookId)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isNoContent())
+        .andExpect(content().string(""));
+    var bb = bookRepository.findById(bookId);
+    assertTrue(bb.isEmpty());
+  }
+
+  @Test
+  @DisplayName("Should return 404 when trying to delete a non-existing book")
+  void shouldReturnNotFoundWhenDeletingNonExistingBook() throws Exception {
+    String token = authenticateAndGetToken();
+    Long invalidBookId = 1l;
+    mockMvc.perform(delete("/books/{id}", invalidBookId)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.data").value(nullValue()))
+        .andExpect(jsonPath("$.errors").value(notNullValue()))
+        .andExpect(jsonPath("$.errors[0].field").value("id"));
   }
 }
