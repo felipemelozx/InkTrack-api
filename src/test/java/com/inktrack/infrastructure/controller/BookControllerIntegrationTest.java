@@ -92,8 +92,8 @@ class BookControllerIntegrationTest {
         .asText();
   }
 
-  private void createBook(String token, BookCreateRequest request) throws Exception {
-    mockMvc.perform(post("/books")
+  private long createBook(String token, BookCreateRequest request) throws Exception {
+    String createBookResponse = mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
@@ -101,7 +101,16 @@ class BookControllerIntegrationTest {
         .andExpect(jsonPath("$.data.id").isNotEmpty())
         .andExpect(jsonPath("$.data.title").value(request.title()))
         .andExpect(jsonPath("$.data.author").value(request.author()))
-        .andExpect(jsonPath("$.data.totalPages").value(request.totalPages()));
+        .andExpect(jsonPath("$.data.totalPages").value(request.totalPages()))
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    return objectMapper
+        .readTree(createBookResponse)
+        .get("data")
+        .get("id")
+        .asLong();
   }
 
   private long createBook(String token, String title) throws Exception {
@@ -234,7 +243,7 @@ class BookControllerIntegrationTest {
         .andExpect(jsonPath("$.data").value(nullValue()))
         .andExpect(jsonPath("$.errors").value(notNullValue()))
         .andExpect(jsonPath("$.errors[0].field").value("id"))
-        .andExpect(jsonPath("$.errors[0].message").value("Book not found with this id: " +  invalidBookId + " and user id: " + userId));
+        .andExpect(jsonPath("$.errors[0].message").value("Book not found with this id: " + invalidBookId + " and user id: " + userId));
 
 
     books = bookRepository.findAll();
@@ -336,6 +345,97 @@ class BookControllerIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.data.length()").value(2))
         .andExpect(jsonPath("$.data.totalPages").value(2));
+  }
+
+  @Test
+  @DisplayName("Should return book with id valid")
+  void shouldReturnBookWithValidId() throws Exception {
+    String token = authenticateAndGetToken();
+    BookCreateRequest request = new BookCreateRequest("Clean code", "Unclo bob", 400);
+
+    Long bookId = createBook(token, request);
+
+    mockMvc.perform(get("/books/{id}", bookId)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.title").value(request.title()))
+        .andExpect(jsonPath("$.data.id").value(bookId))
+        .andExpect(jsonPath("$.data.author").value(request.author()));
+  }
+
+  @Test
+  @DisplayName("Should return 404 when trying to access a book from another user")
+  void shouldReturnNotFoundWhenAccessingBookFromAnotherUser() throws Exception {
+
+    CreateUserRequest userARequest =
+        new CreateUserRequest("User A", "usera@email.com", "Password123!");
+
+    mockMvc.perform(post("/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(userARequest)))
+        .andExpect(status().isCreated());
+
+    LoginRequest loginUserA =
+        new LoginRequest("usera@email.com", "Password123!");
+
+    String tokenUserA = objectMapper.readTree(
+            mockMvc.perform(post("/auth/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(loginUserA)))
+                .andReturn()
+                .getResponse()
+                .getContentAsString()
+        )
+        .get("data")
+        .get("accessToken")
+        .asText();
+
+    BookCreateRequest bookRequest =
+        new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
+
+    Long bookId = createBook(tokenUserA, bookRequest);
+
+    assertTrue(bookRepository.findById(bookId).isPresent());
+
+    CreateUserRequest userBRequest =
+        new CreateUserRequest("User B", "userb@email.com", "Password123!");
+
+    mockMvc.perform(post("/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(userBRequest)))
+        .andExpect(status().isCreated());
+
+    LoginRequest loginUserB =
+        new LoginRequest("userb@email.com", "Password123!");
+
+    String tokenUserB = objectMapper.readTree(
+            mockMvc.perform(post("/auth/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(loginUserB)))
+                .andReturn()
+                .getResponse()
+                .getContentAsString()
+        )
+        .get("data")
+        .get("accessToken")
+        .asText();
+
+    UUID userBId = userRepository
+        .findAll()
+        .stream()
+        .filter(u -> u.getEmail().equals("userb@email.com"))
+        .findFirst()
+        .get()
+        .getId();
+
+    mockMvc.perform(get("/books/{id}", bookId)
+            .header("Authorization", "Bearer " + tokenUserB))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.data").value(nullValue()))
+        .andExpect(jsonPath("$.errors").isNotEmpty())
+        .andExpect(jsonPath("$.errors[0].field").value("id"))
+        .andExpect(jsonPath("$.errors[0].message")
+            .value("Book not found with this id: " + bookId + " and user id: " + userBId));
   }
 
   @Test
