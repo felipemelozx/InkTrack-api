@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - main
-
+  # for test
+  pull_request:
+    branches:
+      - develop
 env:
   APP_NAME: InkTrack
   JAVA_VERSION: 17
