@@ -80,7 +80,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn sonar:sonar \
-            -Dsonar.projectKey=felipemelozx_InkTrack \
+            -Dsonar.projectKey=felipemelozx_InkTrack-api   \
             -Dsonar.organization=felipemelozx-trackmoney \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
