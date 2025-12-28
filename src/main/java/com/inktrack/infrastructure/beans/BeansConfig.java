@@ -3,6 +3,7 @@ package com.inktrack.infrastructure.beans;
 import com.inktrack.core.gateway.BookGateway;
 import com.inktrack.core.gateway.JwtGateway;
 import com.inktrack.core.gateway.PasswordGateway;
+import com.inktrack.core.gateway.ReadingSessionGateway;
 import com.inktrack.core.gateway.UserGateway;
 import com.inktrack.core.usecases.book.CreateBookUseCase;
 import com.inktrack.core.usecases.book.CreateBookUseCaseImpl;
@@ -14,6 +15,8 @@ import com.inktrack.core.usecases.book.GetBooksUseCase;
 import com.inktrack.core.usecases.book.GetBooksUseCaseImpl;
 import com.inktrack.core.usecases.book.UpdateBookUseCase;
 import com.inktrack.core.usecases.book.UpdateBookUseCaseImpl;
+import com.inktrack.core.usecases.reading.sessions.CreateReadingSessionUseCase;
+import com.inktrack.core.usecases.reading.sessions.CreateReadingSessionUseCaseImpl;
 import com.inktrack.core.usecases.user.CreateUserUseCase;
 import com.inktrack.core.usecases.user.CreateUserUseCaseImpl;
 import com.inktrack.core.usecases.user.LoginUseCase;
@@ -65,6 +68,14 @@ public class BeansConfig {
   @Bean
   public DeleteBookUseCase deleteBookUseCase(BookGateway bookGateway) {
     return new DeleteBookUseCaseImpl(bookGateway);
+  }
+
+  @Bean
+  public CreateReadingSessionUseCase createReadingSessionUseCase(
+      ReadingSessionGateway readingSessionGateway,
+      BookGateway bookGateway
+  ) {
+    return new CreateReadingSessionUseCaseImpl(readingSessionGateway, bookGateway);
   }
 
   @Bean
