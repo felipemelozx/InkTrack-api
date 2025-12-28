@@ -1,5 +1,7 @@
 package com.inktrack.core.domain;
 
+import com.inktrack.core.exception.FieldDomainValidationException;
+
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
@@ -88,6 +90,27 @@ public final class Book {
   public static Builder builder() {
     return new Builder();
   }
+
+  public void addPagesRead(Integer pagesRead) {
+    if (pagesRead == null) {
+      throw new FieldDomainValidationException("pageRead", "pagesRead cannot be null");
+    }
+
+    if (pagesRead <= 0) {
+      throw new FieldDomainValidationException("pageRead", "pagesRead must be greater than zero");
+    }
+
+    int newTotalPages = this.pagesRead + pagesRead;
+
+    if (newTotalPages > this.totalPages) {
+      throw new FieldDomainValidationException(
+          "pagesRead", "the pages read can't be greater than the total pages"
+      );
+    }
+
+    this.pagesRead = newTotalPages;
+  }
+
 
   public static final class Builder {
 
