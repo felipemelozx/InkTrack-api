@@ -34,6 +34,7 @@ public class SecurityConfig {
             .requestMatchers("/auth/login").permitAll()
             .requestMatchers("/auth/register").permitAll()
             .requestMatchers("/auth/refresh").permitAll()
+            .requestMatchers("/actuator/health").permitAll()
             .anyRequest().authenticated()
         )
         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
