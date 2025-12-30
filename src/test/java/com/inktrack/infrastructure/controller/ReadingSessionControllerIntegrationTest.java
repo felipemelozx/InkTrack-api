@@ -11,6 +11,7 @@ import com.inktrack.infrastructure.persistence.BookRepository;
 import com.inktrack.infrastructure.persistence.ReadingSessionRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -138,5 +140,44 @@ class ReadingSessionControllerIntegrationTest {
     assertThat(session.getMinutes()).isEqualTo(45L);
     assertThat(session.getPagesRead()).isEqualTo(30);
     assertThat(session.getBook().getId()).isEqualTo(bookId);
+  }
+
+  @Test
+  @DisplayName("should return the reading session paginated")
+  void shouldReturnReadingSessionPaginated() throws Exception {
+    String accessToken = authenticateAndGetToken();
+    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464));
+
+    ReadingSessionCreateRequest request1 = new ReadingSessionCreateRequest(60L, 50);
+    ReadingSessionCreateRequest request2 = new ReadingSessionCreateRequest(30L, 20);
+
+    mockMvc.perform(
+            post("/books/{bookId}/reading-sessions", bookId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + accessToken)
+                .content(objectMapper.writeValueAsString(request1))
+        )
+        .andExpect(status().isCreated());
+
+    mockMvc.perform(
+            post("/books/{bookId}/reading-sessions", bookId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + accessToken)
+                .content(objectMapper.writeValueAsString(request2))
+        )
+        .andExpect(status().isCreated());
+
+    mockMvc.perform(
+            get("/books/{bookId}/reading-sessions", bookId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + accessToken)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.data").isArray())
+        .andExpect(jsonPath("$.data.data.length()").value(2))
+        .andExpect(jsonPath("$.data.data[0].minutes").value(30))
+        .andExpect(jsonPath("$.data.data[0].pagesRead").value(20))
+        .andExpect(jsonPath("$.data.data[1].minutes").value(60))
+        .andExpect(jsonPath("$.data.data[1].pagesRead").value(50));
   }
 }
