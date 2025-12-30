@@ -60,7 +60,7 @@ public class ReadingSessionController {
   }
 
   @GetMapping
-  public ResponseEntity<PageResult<ReadingSessionResponse>> testEndpoint(
+  public ResponseEntity<ApiResponse<PageResult<ReadingSessionResponse>>> getReadingSessionsByBookId(
       @PathVariable Long bookId,
       @RequestParam(defaultValue = "0", required = false) int page,
       @AuthenticationPrincipal UserEntity currentUser
@@ -76,7 +76,7 @@ public class ReadingSessionController {
             .map(readingSessionMapper::outputToResponse)
             .toList()
     );
-    return ResponseEntity.ok().body(responsePageResult);
+    return ResponseEntity.ok().body(ApiResponse.success(responsePageResult));
   }
 
 }
