@@ -1,15 +1,17 @@
 package com.inktrack.core.domain;
 
+import com.inktrack.core.exception.FieldDomainValidationException;
+
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
 public final class ReadingSession {
 
-  private Long id;
-  private Book book;
-  private Long minutes;
-  private Integer pagesRead;
-  private OffsetDateTime sessionDate;
+  private final Long id;
+  private final Book book;
+  private final Long minutes;
+  private final Integer pagesRead;
+  private final OffsetDateTime sessionDate;
 
   private ReadingSession(Builder builder) {
     this.id = builder.id;
@@ -84,11 +86,11 @@ public final class ReadingSession {
       Objects.requireNonNull(sessionDate, "sessionDate must not be null");
 
       if (pagesRead <= 0) {
-        throw new IllegalArgumentException("pagesRead must be greater than zero");
+        throw new FieldDomainValidationException("pagesRead", "pagesRead must be greater than zero");
       }
 
       if (minutes <= 0) {
-        throw new IllegalArgumentException("minutes must be greater than zero");
+        throw new FieldDomainValidationException("minutes", "minutes must be greater than zero");
       }
     }
   }
