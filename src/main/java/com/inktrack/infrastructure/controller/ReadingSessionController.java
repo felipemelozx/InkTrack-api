@@ -1,8 +1,10 @@
 package com.inktrack.infrastructure.controller;
 
 import com.inktrack.core.usecases.reading.sessions.CreateReadingSessionUseCase;
+import com.inktrack.core.usecases.reading.sessions.GetReadingSessionByBookIdUseCase;
 import com.inktrack.core.usecases.reading.sessions.ReadingSessionInput;
 import com.inktrack.core.usecases.reading.sessions.ReadingSessionOutput;
+import com.inktrack.core.utils.PageResult;
 import com.inktrack.infrastructure.dtos.reading.session.ReadingSessionCreateRequest;
 import com.inktrack.infrastructure.dtos.reading.session.ReadingSessionResponse;
 import com.inktrack.infrastructure.entity.UserEntity;
@@ -12,10 +14,12 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -23,13 +27,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReadingSessionController {
 
   private final CreateReadingSessionUseCase createReadingSessionUseCase;
+  private final GetReadingSessionByBookIdUseCase getReadingSessionByBookIdUseCase;
   private final ReadingSessionMapper readingSessionMapper;
 
   public ReadingSessionController(
       CreateReadingSessionUseCase createReadingSessionUseCase,
+      GetReadingSessionByBookIdUseCase getReadingSessionByBookIdUseCase,
       ReadingSessionMapper readingSessionMapper
   ) {
     this.createReadingSessionUseCase = createReadingSessionUseCase;
+    this.getReadingSessionByBookIdUseCase = getReadingSessionByBookIdUseCase;
     this.readingSessionMapper = readingSessionMapper;
   }
 
@@ -48,7 +55,28 @@ public class ReadingSessionController {
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(ApiResponse.success(
-            readingSessionMapper.inputToResponse(output)
+            readingSessionMapper.outputToResponse(output)
         ));
   }
+
+  @GetMapping
+  public ResponseEntity<PageResult<ReadingSessionResponse>> testEndpoint(
+      @PathVariable Long bookId,
+      @RequestParam(defaultValue = "0", required = false) int page,
+      @AuthenticationPrincipal UserEntity currentUser
+  ) {
+    PageResult<ReadingSessionOutput> outputPageResult = getReadingSessionByBookIdUseCase
+        .execute(bookId, currentUser.getId(), page);
+
+    PageResult<ReadingSessionResponse> responsePageResult = new PageResult<>(
+        outputPageResult.pageSize(),
+        outputPageResult.totalPages(),
+        outputPageResult.currentPage(),
+        outputPageResult.data().stream()
+            .map(readingSessionMapper::outputToResponse)
+            .toList()
+    );
+    return ResponseEntity.ok().body(responsePageResult);
+  }
+
 }
