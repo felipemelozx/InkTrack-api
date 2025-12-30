@@ -17,6 +17,7 @@ import com.inktrack.core.usecases.book.UpdateBookUseCase;
 import com.inktrack.core.usecases.book.UpdateBookUseCaseImpl;
 import com.inktrack.core.usecases.reading.sessions.CreateReadingSessionUseCase;
 import com.inktrack.core.usecases.reading.sessions.CreateReadingSessionUseCaseImpl;
+import com.inktrack.core.usecases.reading.sessions.GetReadingSessionByBookIdUseCaseImpl;
 import com.inktrack.core.usecases.user.CreateUserUseCase;
 import com.inktrack.core.usecases.user.CreateUserUseCaseImpl;
 import com.inktrack.core.usecases.user.LoginUseCase;
@@ -76,6 +77,11 @@ public class BeansConfig {
       BookGateway bookGateway
   ) {
     return new CreateReadingSessionUseCaseImpl(readingSessionGateway, bookGateway);
+  }
+
+  @Bean
+  public GetReadingSessionByBookIdUseCaseImpl getReadingSessionByBookIdUseCase(ReadingSessionGateway gateway) {
+    return new GetReadingSessionByBookIdUseCaseImpl(gateway);
   }
 
   @Bean

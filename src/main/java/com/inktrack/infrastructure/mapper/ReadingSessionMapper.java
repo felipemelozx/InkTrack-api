@@ -44,7 +44,7 @@ public class ReadingSessionMapper {
     return new ReadingSessionInput(bookId, request.minutes(), request.pagesRead());
   }
 
-  public ReadingSessionResponse inputToResponse(ReadingSessionOutput output) {
+  public ReadingSessionResponse outputToResponse(ReadingSessionOutput output) {
     return new ReadingSessionResponse(
         output.id(),
         output.bookId(),
