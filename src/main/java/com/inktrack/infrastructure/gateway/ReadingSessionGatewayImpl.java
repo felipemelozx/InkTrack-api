@@ -44,7 +44,8 @@ public class ReadingSessionGatewayImpl implements ReadingSessionGateway {
         Sort.by(Sort.Direction.DESC, "sessionDate")
     );
 
-    Page<ReadingSessionEntity> readingSessionEntityPage = readingSessionRepository.getReadingSession(bookId, userId, pageable);
+    Page<ReadingSessionEntity> readingSessionEntityPage = readingSessionRepository
+        .getReadingSession(bookId, userId, pageable);
 
     return new PageResult<>(
         size,
