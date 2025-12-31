@@ -1,5 +1,7 @@
 package com.inktrack.infrastructure.exception;
 
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.inktrack.core.exception.BookNotFoundException;
 import com.inktrack.core.exception.EmailAlreadyExistsException;
 import com.inktrack.core.exception.EmailNotFoundException;
@@ -15,8 +17,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
-import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 
 import java.util.List;
 
@@ -153,4 +153,20 @@ public class RestExceptionHandler {
         HttpStatus.NOT_FOUND
     );
   }
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ApiResponse<CustomFieldError>> handleGenericException(
+      Exception ex
+  ) {
+
+    CustomFieldError error = new CustomFieldError(
+        "internal_error",
+        "An unexpected error occurred. Please try again later."
+    );
+
+    return new ResponseEntity<>(
+        ApiResponse.failure(List.of(error), "Internal server error"),
+        HttpStatus.INTERNAL_SERVER_ERROR
+    );
+  }
+
 }
