@@ -7,6 +7,7 @@ import com.inktrack.core.exception.EmailAlreadyExistsException;
 import com.inktrack.core.exception.EmailNotFoundException;
 import com.inktrack.core.exception.FieldDomainValidationException;
 import com.inktrack.core.exception.InvalidCredentialsException;
+import com.inktrack.core.exception.ResourceNotFoundException;
 import com.inktrack.core.exception.UnauthorizedException;
 import com.inktrack.infrastructure.utils.CustomFieldError;
 import com.inktrack.infrastructure.utils.response.ApiResponse;
@@ -153,6 +154,20 @@ public class RestExceptionHandler {
         HttpStatus.NOT_FOUND
     );
   }
+
+  @ExceptionHandler(ResourceNotFoundException.class)
+  public ResponseEntity<ApiResponse<CustomFieldError>> handleResourceNotFound(
+      ResourceNotFoundException ex
+  ) {
+    return new ResponseEntity<>(
+        ApiResponse.failure(
+            List.of(new CustomFieldError(ex.getField(), ex.getMessage())),
+            ex.getResource() + " not found"
+        ),
+        HttpStatus.NOT_FOUND
+    );
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<CustomFieldError>> handleGenericException(
       Exception ex
