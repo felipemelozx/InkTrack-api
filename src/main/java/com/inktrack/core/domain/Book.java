@@ -1,7 +1,5 @@
 package com.inktrack.core.domain;
 
-import com.inktrack.core.exception.FieldDomainValidationException;
-
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
@@ -43,10 +41,17 @@ public final class Book {
   }
 
 
-  public void updatePagesRead(int newValue) {
-    if (newValue < 0 || newValue > totalPages) {
-      throw new IllegalArgumentException("pagesRead must be between 0 and totalPages");
+  public void removePagesRead(int pages) {
+    if (pages < 0) {
+      throw new IllegalArgumentException("pages must be positive");
     }
+
+    int newValue = this.pagesRead - pages;
+
+    if (newValue < 0) {
+      throw new IllegalArgumentException("pagesRead cannot be negative");
+    }
+
     this.pagesRead = newValue;
     this.updatedAt = OffsetDateTime.now();
   }
@@ -91,26 +96,20 @@ public final class Book {
     return new Builder();
   }
 
-  public void addPagesRead(Integer pagesRead) {
-    if (pagesRead == null) {
-      throw new FieldDomainValidationException("pageRead", "pagesRead cannot be null");
+  public void addPagesRead(int pages) {
+    if (pages < 0) {
+      throw new IllegalArgumentException("pages must be positive");
     }
 
-    if (pagesRead <= 0) {
-      throw new FieldDomainValidationException("pageRead", "pagesRead must be greater than zero");
+    int newValue = this.pagesRead + pages;
+
+    if (newValue > totalPages) {
+      throw new IllegalArgumentException("pagesRead cannot exceed totalPages");
     }
 
-    int newTotalPages = this.pagesRead + pagesRead;
-
-    if (newTotalPages > this.totalPages) {
-      throw new FieldDomainValidationException(
-          "pagesRead", "the pages read can't be greater than the total pages"
-      );
-    }
-
-    this.pagesRead = newTotalPages;
+    this.pagesRead = newValue;
+    this.updatedAt = OffsetDateTime.now();
   }
-
 
   public static final class Builder {
 
