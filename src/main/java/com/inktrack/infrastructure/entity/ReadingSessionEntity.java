@@ -36,7 +36,8 @@ public class ReadingSessionEntity {
   protected ReadingSessionEntity() {
   }
 
-  public ReadingSessionEntity(BookEntity book, Integer pagesRead, Long minutes, OffsetDateTime sessionDate) {
+  public ReadingSessionEntity(Long id, BookEntity book, Integer pagesRead, Long minutes, OffsetDateTime sessionDate) {
+    this.id = id;
     this.book = book;
     this.pagesRead = pagesRead;
     this.minutes = minutes;

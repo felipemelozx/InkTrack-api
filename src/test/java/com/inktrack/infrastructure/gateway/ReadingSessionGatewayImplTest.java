@@ -57,6 +57,7 @@ class ReadingSessionGatewayImplTest {
     BookEntity bookEntity = mock(BookEntity.class);
 
     entity = new ReadingSessionEntity(
+        null,
         bookEntity,
         20,
         30L,
@@ -64,6 +65,7 @@ class ReadingSessionGatewayImplTest {
     );
 
     entitySaved = new ReadingSessionEntity(
+        null,
         bookEntity,
         20,
         30L,

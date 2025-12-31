@@ -22,6 +22,7 @@ public class ReadingSessionMapper {
   public ReadingSessionEntity domainToEntity(ReadingSession readingSession) {
     BookEntity book = bookMapper.domainToEntity(readingSession.getBook());
     return new ReadingSessionEntity(
+        readingSession.getId(),
         book,
         readingSession.getPagesRead(),
         readingSession.getMinutes(),
