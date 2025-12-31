@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -56,6 +57,18 @@ public class ReadingSessionGatewayImpl implements ReadingSessionGateway {
             .map(readingSessionMapper::entityToDomain)
             .toList()
     );
+  }
+
+  @Override
+  public Optional<ReadingSession> getByIdAndByBookIdAndUserId(Long readingSessionId, Long bookId, UUID userId) {
+    Optional<ReadingSessionEntity> optionalEntity = readingSessionRepository
+        .getByIdAndByBookIdAndUserId(readingSessionId, bookId, userId);
+    return optionalEntity.map(readingSessionMapper::entityToDomain);
+  }
+
+  @Override
+  public ReadingSession update(ReadingSession readingSession) {
+    return save(readingSession);
   }
 
 }
