@@ -164,7 +164,7 @@ class BookGatewayIntegrationTest {
 
     Book savedBook = bookGateway.save(book);
 
-    savedBook.updatePagesRead(120);
+    savedBook.addPagesRead(120);
 
     Book updatedBook = bookGateway.update(savedBook);
 
