@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -112,6 +113,21 @@ class ReadingSessionControllerIntegrationTest {
         .asLong();
   }
 
+  private long createReadingSession(String token, long bookId, ReadingSessionCreateRequest request) throws Exception {
+    String createResponse = mockMvc.perform(
+            post("/books/{bookId}/reading-sessions", bookId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .content(objectMapper.writeValueAsString(request))
+        )
+        .andExpect(status().isCreated())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    return objectMapper.readTree(createResponse).get("data").get("id").asLong();
+  }
+
   @Test
   void shouldCreateReadingSessionSuccessfully() throws Exception {
     String accessToken = authenticateAndGetToken();
@@ -151,21 +167,8 @@ class ReadingSessionControllerIntegrationTest {
     ReadingSessionCreateRequest request1 = new ReadingSessionCreateRequest(60L, 50);
     ReadingSessionCreateRequest request2 = new ReadingSessionCreateRequest(30L, 20);
 
-    mockMvc.perform(
-            post("/books/{bookId}/reading-sessions", bookId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + accessToken)
-                .content(objectMapper.writeValueAsString(request1))
-        )
-        .andExpect(status().isCreated());
-
-    mockMvc.perform(
-            post("/books/{bookId}/reading-sessions", bookId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + accessToken)
-                .content(objectMapper.writeValueAsString(request2))
-        )
-        .andExpect(status().isCreated());
+    createReadingSession(accessToken, bookId, request1);
+    createReadingSession(accessToken, bookId, request2);
 
     mockMvc.perform(
             get("/books/{bookId}/reading-sessions", bookId)
@@ -179,5 +182,54 @@ class ReadingSessionControllerIntegrationTest {
         .andExpect(jsonPath("$.data.data[0].pagesRead").value(20))
         .andExpect(jsonPath("$.data.data[1].minutes").value(60))
         .andExpect(jsonPath("$.data.data[1].pagesRead").value(50));
+  }
+
+  @Test
+  @DisplayName("should return 404 when trying to get reading sessions for a non-existent book")
+  void shouldReturn404WhenGettingReadingSessionsForNonExistentBook() throws Exception {
+    String accessToken = authenticateAndGetToken();
+
+    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464));
+    long readingSessionId = createReadingSession(accessToken, bookId, new ReadingSessionCreateRequest(60L, 50));
+
+    ReadingSessionCreateRequest requestUpdated = new ReadingSessionCreateRequest(30L, 20);
+
+    mockMvc.perform(
+            put("/books/{bookId}/reading-sessions/{readingSessionId}", bookId, readingSessionId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + accessToken)
+                .content(objectMapper.writeValueAsString(requestUpdated))
+        )
+        .andExpect(status().isOk());
+
+    mockMvc.perform(
+            get("/books/{bookId}/reading-sessions", bookId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + accessToken)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.data").isArray())
+        .andExpect(jsonPath("$.data.data.length()").value(1))
+        .andExpect(jsonPath("$.data.data[0].minutes").value(30))
+        .andExpect(jsonPath("$.data.data[0].pagesRead").value(20));
+  }
+
+  @Test
+  @DisplayName("Should return 404 when not found the reading session")
+  void shouldReturn404WhenReadingSessionNotFound() throws Exception {
+    String accessToken = authenticateAndGetToken();
+    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464));
+    ReadingSessionCreateRequest request = new ReadingSessionCreateRequest(60L, 50);
+    String expectedMessage = "Reading session not found with id: 1";
+    mockMvc.perform(
+            put("/books/{bookId}/reading-sessions/1", bookId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + accessToken)
+                .content(objectMapper.writeValueAsString(request))
+        )
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.message").value("reading-session not found"))
+        .andExpect(jsonPath("$.errors[0].field").value("id"))
+        .andExpect(jsonPath("$.errors[0].message").value(expectedMessage));
   }
 }
