@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -69,6 +70,12 @@ public class ReadingSessionGatewayImpl implements ReadingSessionGateway {
   @Override
   public ReadingSession update(ReadingSession readingSession) {
     return save(readingSession);
+  }
+
+  @Override
+  @Transactional
+  public int deleteReadingSession(Long sessionId, UUID userId, Long bookId) {
+    return readingSessionRepository.deleteByIdAndUserId(sessionId, bookId, userId);
   }
 
 }
