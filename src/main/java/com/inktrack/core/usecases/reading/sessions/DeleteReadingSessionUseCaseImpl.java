@@ -27,24 +27,21 @@ public class DeleteReadingSessionUseCaseImpl implements DeleteReadingSessionUseC
             "ReadingSession",
             "compositeId",
             String.format(
-                "sessionId=%d, bookId=%d, userId=%s",
+                "ReadingSession not found with sessionId=%d, bookId=%d, userId=%s",
                 sessionId, bookId, userId
             )
         ));
 
 
-    int rows = readingSessionGateway.deleteReadingSession(sessionId, userId, bookId);
-    if (rows == 0) {
-      throw new ResourceNotFoundException(
-          "ReadingSession",
-          "compositeId",
-          String.format(
-              "sessionId=%d, bookId=%d, userId=%s",
-              sessionId, bookId, userId
-          )
+    boolean deleted = readingSessionGateway
+        .deleteReadingSession(sessionId, userId, bookId) > 0;
+
+    if (!deleted) {
+      throw new IllegalStateException(
+          "ReadingSession was found but could not be deleted. " +
+              "Possible concurrent modification."
       );
     }
-
     book.removePagesRead(readingSession.getPagesRead());
     bookGateway.update(book);
   }
