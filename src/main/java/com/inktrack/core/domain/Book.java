@@ -41,10 +41,17 @@ public final class Book {
   }
 
 
-  public void updatePagesRead(int newValue) {
-    if (newValue < 0 || newValue > totalPages) {
-      throw new IllegalArgumentException("pagesRead must be between 0 and totalPages");
+  public void removePagesRead(int pages) {
+    if (pages < 0) {
+      throw new IllegalArgumentException("pages must be positive");
     }
+
+    int newValue = this.pagesRead - pages;
+
+    if (newValue < 0) {
+      throw new IllegalArgumentException("pagesRead cannot be negative");
+    }
+
     this.pagesRead = newValue;
     this.updatedAt = OffsetDateTime.now();
   }
@@ -87,6 +94,21 @@ public final class Book {
 
   public static Builder builder() {
     return new Builder();
+  }
+
+  public void addPagesRead(int pages) {
+    if (pages < 0) {
+      throw new IllegalArgumentException("pages must be positive");
+    }
+
+    int newValue = this.pagesRead + pages;
+
+    if (newValue > totalPages) {
+      throw new IllegalArgumentException("pagesRead cannot exceed totalPages");
+    }
+
+    this.pagesRead = newValue;
+    this.updatedAt = OffsetDateTime.now();
   }
 
   public static final class Builder {

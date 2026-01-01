@@ -11,13 +11,13 @@ import com.inktrack.infrastructure.entity.UserEntity;
 import com.inktrack.infrastructure.mapper.BookMapper;
 import com.inktrack.infrastructure.mapper.UserMapper;
 import com.inktrack.infrastructure.persistence.BookRepository;
+import com.inktrack.infrastructure.persistence.ReadingSessionRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = InkTrackApplication.class)
 @ActiveProfiles("test")
-@Transactional
 class BookGatewayIntegrationTest {
 
   @Autowired
@@ -39,6 +38,9 @@ class BookGatewayIntegrationTest {
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private ReadingSessionRepository readingSessionRepository;
 
   @Autowired
   private BookMapper bookMapper;
@@ -53,8 +55,6 @@ class BookGatewayIntegrationTest {
   @BeforeEach
   void setUp() {
     bookGateway = new BookGatewayImpl(bookRepository, bookMapper);
-    bookRepository.deleteAll();
-    userRepository.deleteAll();
 
     User user = new User(
         null,
@@ -68,6 +68,13 @@ class BookGatewayIntegrationTest {
         userRepository.save(userMapper.domainToEntity(user));
 
     savedUser = userMapper.entityToDomain(savedEntity);
+  }
+
+  @BeforeEach
+  void cleanDatabase() {
+    readingSessionRepository.deleteAllInBatch();
+    bookRepository.deleteAllInBatch();
+    userRepository.deleteAllInBatch();
   }
 
   @Test
@@ -157,7 +164,7 @@ class BookGatewayIntegrationTest {
 
     Book savedBook = bookGateway.save(book);
 
-    savedBook.updatePagesRead(120);
+    savedBook.addPagesRead(120);
 
     Book updatedBook = bookGateway.update(savedBook);
 
