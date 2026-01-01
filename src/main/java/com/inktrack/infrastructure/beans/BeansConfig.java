@@ -17,6 +17,8 @@ import com.inktrack.core.usecases.book.UpdateBookUseCase;
 import com.inktrack.core.usecases.book.UpdateBookUseCaseImpl;
 import com.inktrack.core.usecases.reading.sessions.CreateReadingSessionUseCase;
 import com.inktrack.core.usecases.reading.sessions.CreateReadingSessionUseCaseImpl;
+import com.inktrack.core.usecases.reading.sessions.DeleteReadingSessionUseCase;
+import com.inktrack.core.usecases.reading.sessions.DeleteReadingSessionUseCaseImpl;
 import com.inktrack.core.usecases.reading.sessions.GetReadingSessionByBookIdUseCaseImpl;
 import com.inktrack.core.usecases.reading.sessions.UpdateReadingSessionUseCase;
 import com.inktrack.core.usecases.reading.sessions.UpdateReadingSessionUseCaseImpl;
@@ -92,6 +94,14 @@ public class BeansConfig {
       ReadingSessionGateway readingSessionGateway
   ) {
     return new UpdateReadingSessionUseCaseImpl(readingSessionGateway, bookGateway);
+  }
+
+  @Bean
+  public DeleteReadingSessionUseCase readingSessionUseCase(
+      ReadingSessionGateway readingSessionGateway,
+      BookGateway bookGateway
+  ) {
+    return new DeleteReadingSessionUseCaseImpl(readingSessionGateway, bookGateway);
   }
 
   @Bean
