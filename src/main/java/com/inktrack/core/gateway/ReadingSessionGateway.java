@@ -16,4 +16,6 @@ public interface ReadingSessionGateway {
 
   ReadingSession update(ReadingSession readingSession);
 
+  int deleteReadingSession(Long sessionId, UUID userId, Long bookId);
+
 }
