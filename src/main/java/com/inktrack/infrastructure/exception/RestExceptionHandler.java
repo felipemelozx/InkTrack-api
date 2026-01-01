@@ -14,6 +14,7 @@ import com.inktrack.infrastructure.utils.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,20 +25,22 @@ import java.util.List;
 @ControllerAdvice
 public class RestExceptionHandler {
 
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiResponse<List<CustomFieldError>>> handleValidationExceptions(
-      MethodArgumentNotValidException ex
-  ) {
-    List<CustomFieldError> errors = ex.getBindingResult()
-        .getAllErrors()
-        .stream()
+  private List<CustomFieldError> extractErrors(List<ObjectError> objectErrors) {
+    return objectErrors.stream()
         .map(error -> {
           if (error instanceof FieldError fieldError) {
             return new CustomFieldError(fieldError.getField(), fieldError.getDefaultMessage());
           } else {
-            return new CustomFieldError("object", error.getDefaultMessage());
+            return new CustomFieldError("param", error.getDefaultMessage());
           }
         }).toList();
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ApiResponse<List<CustomFieldError>>> handleValidationExceptions(
+      MethodArgumentNotValidException ex
+  ) {
+    List<CustomFieldError> errors = extractErrors(ex.getBindingResult().getAllErrors());
 
     return new ResponseEntity<>(
         ApiResponse.failure(errors, "Validation failed"),
@@ -49,23 +52,14 @@ public class RestExceptionHandler {
   public ResponseEntity<ApiResponse<List<CustomFieldError>>> handlePathVariableValidationExceptions(
       HandlerMethodValidationException ex
   ) {
-
-    List<CustomFieldError> errors = ex.getAllErrors()
-        .stream()
-        .map(error -> {
-          if (error instanceof FieldError fieldError) {
-            return new CustomFieldError(fieldError.getField(), fieldError.getDefaultMessage());
-          } else {
-            return new CustomFieldError("param", error.getDefaultMessage());
-          }
-        })
-        .toList();
+    List<CustomFieldError> errors = extractErrors((List<ObjectError>) ex.getAllErrors());
 
     return new ResponseEntity<>(
         ApiResponse.failure(errors, "Validation failed"),
         HttpStatus.BAD_REQUEST
     );
   }
+
 
   @ExceptionHandler(EmailAlreadyExistsException.class)
   public ResponseEntity<ApiResponse<CustomFieldError>> handleEmailAlreadyExistsException(
