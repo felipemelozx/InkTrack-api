@@ -7,6 +7,7 @@ import com.inktrack.infrastructure.dtos.reading.session.ReadingSessionCreateRequ
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
 import com.inktrack.infrastructure.dtos.user.LoginRequest;
 import com.inktrack.infrastructure.entity.ReadingSessionEntity;
+import com.inktrack.infrastructure.entity.UserEntity;
 import com.inktrack.infrastructure.persistence.BookRepository;
 import com.inktrack.infrastructure.persistence.ReadingSessionRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
@@ -24,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -230,6 +232,46 @@ class ReadingSessionControllerIntegrationTest {
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.message").value("reading-session not found"))
         .andExpect(jsonPath("$.errors[0].field").value("id"))
+        .andExpect(jsonPath("$.errors[0].message").value(expectedMessage));
+  }
+
+  @Test
+  @DisplayName("should delete reading session successfully")
+  void shouldDeleteReadingSessionSuccessfully() throws Exception {
+    String accessToken = authenticateAndGetToken();
+    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464));
+    long readingSessionId = createReadingSession(accessToken, bookId, new ReadingSessionCreateRequest(60L, 50));
+
+    assertThat(readingSessionRepository.count()).isEqualTo(1);
+
+    mockMvc.perform(
+            delete("/books/{bookId}/reading-sessions/{readingSessionId}", bookId, readingSessionId)
+                .header("Authorization", "Bearer " + accessToken)
+        )
+        .andExpect(status().isNoContent());
+
+    var sessions = readingSessionRepository.findAll();
+    assertThat(sessions).isEmpty();
+  }
+
+  @Test
+  @DisplayName("should return 404 when trying to delete a non-existent reading session")
+  void shouldReturn404WhenDeletingNonExistentSession() throws Exception {
+    String accessToken = authenticateAndGetToken();
+    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464));
+    UserEntity user = userRepository.findAll().get(0);
+    String expectedMessage = String.format(
+        "ReadingSession not found with sessionId=%d, bookId=%d, userId=%s",
+        999L, bookId, user.getId()
+    );
+
+    mockMvc.perform(
+            delete("/books/{bookId}/reading-sessions/{readingSessionId}", bookId, 999L)
+                .header("Authorization", "Bearer " + accessToken)
+        )
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.message").value("ReadingSession not found"))
+        .andExpect(jsonPath("$.errors[0].field").value("compositeId"))
         .andExpect(jsonPath("$.errors[0].message").value(expectedMessage));
   }
 }
