@@ -22,7 +22,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -241,5 +243,73 @@ class NoteControllerIntegrationTest {
         .andExpect(jsonPath("$.errors").isArray())
         .andExpect(jsonPath("$.errors.length()").value(2))
         .andExpect(jsonPath("$.errors[*].field").value(containsInAnyOrder("bookId", "content")));
+  }
+
+  @Test
+  @DisplayName("Should return paginated notes successfully for a specific book")
+  void shouldGetNotesPaginatedSuccessfully() throws Exception {
+    String token = authenticateAndGetToken();
+
+    BookCreateRequest bookRequest = new BookCreateRequest("Domain-Driven Design", "Eric Evans", 400);
+    long bookId = createBook(token, bookRequest);
+
+    createNote(token, new CreateNoteRequest(bookId, "Note about aggregates"));
+    createNote(token, new CreateNoteRequest(bookId, "Note about repositories"));
+
+    mockMvc.perform(get("/notes")
+            .header("Authorization", "Bearer " + token)
+            .param("bookId", String.valueOf(bookId))
+            .param("page", "0")
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data").isNotEmpty())
+        .andExpect(jsonPath("$.data.data").isArray())
+        .andExpect(jsonPath("$.data.data", hasSize(2)))
+        .andExpect(jsonPath("$.data.currentPage").value(0))
+        .andExpect(jsonPath("$.data.data[0].bookId").value(bookId))
+        .andExpect(jsonPath("$.data.data[1].content").value("Note about aggregates"));
+  }
+
+  @Test
+  @DisplayName("Should return empty list when book has no notes")
+  void shouldReturnEmptyListWhenBookHasNoNotes() throws Exception {
+    String token = authenticateAndGetToken();
+
+    BookCreateRequest bookRequest = new BookCreateRequest("Clean Code", "Robert Martin", 464);
+    long bookId = createBook(token, bookRequest);
+
+    mockMvc.perform(get("/notes")
+            .header("Authorization", "Bearer " + token)
+            .param("bookId", String.valueOf(bookId))
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.data").isArray())
+        .andExpect(jsonPath("$.data.data", hasSize(0)));
+  }
+
+  @Test
+  @DisplayName("Should return 400 Bad Request when bookId parameter is missing")
+  void shouldReturnBadRequestWhenBookIdIsMissing() throws Exception {
+    String token = authenticateAndGetToken();
+
+    mockMvc.perform(get("/notes")
+                .header("Authorization", "Bearer " + token)
+            // bookId não é enviado
+        )
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("Should return 400 Bad Request when bookId is not a valid number")
+  void shouldReturnBadRequestWhenBookIdIsInvalid() throws Exception {
+    String token = authenticateAndGetToken();
+
+    mockMvc.perform(get("/notes")
+            .header("Authorization", "Bearer " + token)
+            .param("bookId", "invalid-number")
+        )
+        .andExpect(status().isBadRequest());
   }
 }
