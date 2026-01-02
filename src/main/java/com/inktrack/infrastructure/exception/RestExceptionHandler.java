@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
@@ -162,6 +163,22 @@ public class RestExceptionHandler {
         HttpStatus.NOT_FOUND
     );
   }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ApiResponse<CustomFieldError>> handleMissingRequestParam(
+      MissingServletRequestParameterException ex
+  ) {
+    String field = ex.getParameterName();
+    String message = "Required request parameter is missing";
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(ApiResponse.failure(
+            List.of(new CustomFieldError(field, message)),
+            "Invalid request parameter"
+        ));
+  }
+
 
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<ApiResponse<CustomFieldError>> handleTypeMismatch(
