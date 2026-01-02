@@ -48,7 +48,6 @@ public class NoteController {
     NoteOutput noteOutput = createNoteUseCase.execute(currentUser.getId(), noteInput);
     NoteResponse noteResponse = noteMapper.outputToResponse(noteOutput);
     ApiResponse<NoteResponse> apiResponse = ApiResponse.success(noteResponse);
-    return ResponseEntity.ok(apiResponse);
     return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
   }
 
