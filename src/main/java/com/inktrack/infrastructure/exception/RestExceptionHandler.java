@@ -19,6 +19,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 
@@ -160,6 +161,25 @@ public class RestExceptionHandler {
         ),
         HttpStatus.NOT_FOUND
     );
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ApiResponse<CustomFieldError>> handleTypeMismatch(
+      MethodArgumentTypeMismatchException ex
+  ) {
+    String field = ex.getName();
+    String expectedType = ex.getRequiredType() != null
+        ? ex.getRequiredType().getSimpleName()
+        : "unknown";
+
+    String message = "Invalid value. Expected type: " + expectedType;
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(ApiResponse.failure(
+            List.of(new CustomFieldError(field, message)),
+            "Invalid request parameter"
+        ));
   }
 
   @ExceptionHandler(Exception.class)
