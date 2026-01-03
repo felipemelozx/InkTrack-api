@@ -2,9 +2,7 @@ package com.inktrack.infrastructure.mapper;
 
 import com.inktrack.core.domain.Book;
 import com.inktrack.core.domain.Note;
-import com.inktrack.core.usecases.note.NoteInput;
 import com.inktrack.core.usecases.note.NoteOutput;
-import com.inktrack.infrastructure.dtos.notes.CreateNoteRequest;
 import com.inktrack.infrastructure.dtos.notes.NoteResponse;
 import com.inktrack.infrastructure.entity.BookEntity;
 import com.inktrack.infrastructure.entity.NoteEntity;
@@ -26,8 +24,7 @@ public class NoteMapper {
         bookEntity,
         note.getContent(),
         note.getCreatedAt(),
-        note.getUpdatedAt()
-    );
+        note.getUpdatedAt());
   }
 
   public Note entityToDomain(NoteEntity noteEntity) {
@@ -37,12 +34,7 @@ public class NoteMapper {
         book,
         noteEntity.getContent(),
         noteEntity.getCreatedAt(),
-        noteEntity.getUpdatedAt()
-    );
-  }
-
-  public NoteInput requestToInput(CreateNoteRequest createNoteRequest) {
-    return new NoteInput(createNoteRequest.bookId(), createNoteRequest.content());
+        noteEntity.getUpdatedAt());
   }
 
   public NoteResponse outputToResponse(NoteOutput noteOutput) {
@@ -51,7 +43,6 @@ public class NoteMapper {
         noteOutput.bookId(),
         noteOutput.content(),
         noteOutput.createAt(),
-        noteOutput.updatedAt()
-    );
+        noteOutput.updatedAt());
   }
 }
