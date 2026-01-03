@@ -57,4 +57,9 @@ public class NoteGatewayImpl implements NoteGateway {
     Optional<NoteEntity> entityOptional = noteRepository.findByNoteIdBookIdUserId(noteId, bookId, userId);
     return entityOptional.map(noteMapper::entityToDomain);
   }
+
+  @Override
+  public int deleteNote(Long bookID, Long noteId, UUID userId) {
+    return noteRepository.deleteByIdBookIdUserId(noteId, bookID, userId);
+  }
 }

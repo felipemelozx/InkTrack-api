@@ -4,6 +4,7 @@ import com.inktrack.infrastructure.entity.NoteEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -31,5 +32,22 @@ public interface NoteRepository extends JpaRepository<NoteEntity, Long> {
          AND n.id = :noteId
          AND n.book.user.id = :userId
       """)
-  Optional<NoteEntity> findByNoteIdBookIdUserId(Long noteId, Long bookId, UUID userId);
+  Optional<NoteEntity> findByNoteIdBookIdUserId(
+      @Param("noteId") Long noteId,
+      @Param("bookId") Long bookId,
+      @Param("userId") UUID userId
+  );
+
+  @Modifying
+  @Query("""
+       DELETE FROM NoteEntity n
+       WHERE n.id = :noteId
+       AND n.book.id = :bookID
+       AND n.book.user.id = :userId
+      """)
+  int deleteByIdBookIdUserId(
+      @Param("noteId") Long noteId,
+      @Param("bookId") Long bookId,
+      @Param("userId") UUID userId
+  );
 }
