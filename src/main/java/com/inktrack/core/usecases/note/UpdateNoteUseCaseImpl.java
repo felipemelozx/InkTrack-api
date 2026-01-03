@@ -37,7 +37,7 @@ public class UpdateNoteUseCaseImpl implements UpdateNoteUseCase {
         noteToUpdate.getCreatedAt(),
         OffsetDateTime.now()
     );
-    Note savedNote = noteGateway.save(updatedNote);
+    Note savedNote = noteGateway.update(updatedNote);
     return new NoteOutput(
         savedNote.getId(),
         savedNote.getBook().getId(),
