@@ -33,6 +33,11 @@ public class NoteGatewayImpl implements NoteGateway {
   }
 
   @Override
+  public Note update(Note note) {
+    return save(note);
+  }
+
+  @Override
   public PageResult<Note> getNotesByBooidAndUserId(Long bookId, UUID userId, int page) {
     Pageable pageRequest = PageRequest.of(page, 5, Sort.by(Sort.Direction.DESC, "updatedAt"));
     Page<NoteEntity> pageEntity = noteRepository.findByBookIdAndUserId(bookId, userId, pageRequest);

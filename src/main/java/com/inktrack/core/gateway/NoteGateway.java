@@ -10,6 +10,8 @@ public interface NoteGateway {
 
   Note save(Note note);
 
+  Note update(Note note);
+
   PageResult<Note> getNotesByBooidAndUserId(Long bookId, UUID userId, int page);
 
   Optional<Note> getNoteByIdAndBookIdAndUserId(Long bookId, Long noteId, UUID userId);
