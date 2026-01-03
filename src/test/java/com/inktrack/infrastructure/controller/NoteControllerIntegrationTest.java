@@ -21,12 +21,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -327,6 +327,44 @@ class NoteControllerIntegrationTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errors[0].field").value("content"))
                 .andExpect(jsonPath("$.errors[0].message").value("size must be between 0 and 255"));
+    }
+
+    @Test
+    @DisplayName("Should delete note successfully when it exists")
+    void shouldDeleteNoteSuccessfully() throws Exception {
+        String token = authenticateAndGetToken();
+
+        BookCreateRequest bookRequest = new BookCreateRequest("Design Patterns", "Gang of Four", 395);
+        long bookId = createBook(token, bookRequest);
+
+        long noteId = createNote(
+                token,
+                bookId,
+                new CreateNoteRequest("Singleton pattern note"));
+
+        mockMvc.perform(
+                delete("/books/" + bookId + "/notes/" + noteId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/books/" + bookId + "/notes")
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.data", hasSize(0)));
+    }
+
+    @Test
+    @DisplayName("Should return 404 Not Found when deleting non-existing note")
+    void shouldReturnNotFoundWhenDeletingNonExistingNote() throws Exception {
+        String token = authenticateAndGetToken();
+
+        BookCreateRequest bookRequest = new BookCreateRequest("Test Book", "Test Author", 100);
+        long bookId = createBook(token, bookRequest);
+
+        mockMvc.perform(
+                delete("/books/" + bookId + "/notes/9999")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNotFound());
     }
 
 }
