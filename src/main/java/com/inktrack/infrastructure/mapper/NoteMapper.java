@@ -22,6 +22,7 @@ public class NoteMapper {
   public NoteEntity domainToEntity(Note note) {
     BookEntity bookEntity = bookMapper.domainToEntity(note.getBook());
     return new NoteEntity(
+        note.getId(),
         bookEntity,
         note.getContent(),
         note.getCreatedAt(),

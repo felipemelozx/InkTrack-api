@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -312,4 +313,137 @@ class NoteControllerIntegrationTest {
         )
         .andExpect(status().isBadRequest());
   }
+
+  @Test
+  @DisplayName("Should update note successfully when request is valid")
+  void shouldUpdateNoteSuccessfully() throws Exception {
+    String token = authenticateAndGetToken();
+
+    BookCreateRequest bookRequest =
+        new BookCreateRequest("Refactoring", "Martin Fowler", 450);
+    long bookId = createBook(token, bookRequest);
+
+    long noteId = createNote(
+        token,
+        new CreateNoteRequest(bookId, "Initial content")
+    );
+
+    CreateNoteRequest updateRequest =
+        new CreateNoteRequest(bookId, "Updated note content");
+
+    mockMvc.perform(
+            put("/notes/{noteId}", noteId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest))
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.id").value(noteId))
+        .andExpect(jsonPath("$.data.bookId").value(bookId))
+        .andExpect(jsonPath("$.data.content").value("Updated note content"))
+        .andExpect(jsonPath("$.data.updatedAt").exists());
+  }
+
+  @Test
+  @DisplayName("Should return 404 when updating a non-existing note")
+  void shouldReturnNotFoundWhenNoteDoesNotExist() throws Exception {
+    String token = authenticateAndGetToken();
+
+    CreateNoteRequest updateRequest =
+        new CreateNoteRequest(1L, "Updated content");
+
+    mockMvc.perform(
+            put("/notes/{noteId}", 999L)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest))
+        )
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.success").value(false));
+  }
+
+  @Test
+  @DisplayName("Should return 400 Bad Request when updating note with blank content")
+  void shouldReturnBadRequestWhenUpdatingWithBlankContent() throws Exception {
+    String token = authenticateAndGetToken();
+
+    BookCreateRequest bookRequest =
+        new BookCreateRequest("Clean Architecture", "Robert Martin", 350);
+    long bookId = createBook(token, bookRequest);
+
+    long noteId = createNote(
+        token,
+        new CreateNoteRequest(bookId, "Valid content")
+    );
+
+    CreateNoteRequest updateRequest =
+        new CreateNoteRequest(bookId, "   ");
+
+    mockMvc.perform(
+            put("/notes/{noteId}", noteId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest))
+        )
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.message").value("Validation failed"))
+        .andExpect(jsonPath("$.errors[0].field").value("content"))
+        .andExpect(jsonPath("$.errors[0].message").value("must not be blank"));
+  }
+
+  @Test
+  @DisplayName("Should return 400 Bad Request when updating note with content exceeding 255 chars")
+  void shouldReturnBadRequestWhenUpdatingWithLongContent() throws Exception {
+    String token = authenticateAndGetToken();
+
+    BookCreateRequest bookRequest =
+        new BookCreateRequest("Java Concurrency", "Brian Goetz", 420);
+    long bookId = createBook(token, bookRequest);
+
+    long noteId = createNote(
+        token,
+        new CreateNoteRequest(bookId, "Initial content")
+    );
+
+    String longContent = "a".repeat(256);
+    CreateNoteRequest updateRequest =
+        new CreateNoteRequest(bookId, longContent);
+
+    mockMvc.perform(
+            put("/notes/{noteId}", noteId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest))
+        )
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.errors[0].field").value("content"))
+        .andExpect(jsonPath("$.errors[0].message").value("size must be between 0 and 255"));
+  }
+
+  @Test
+  @DisplayName("Should return 400 Bad Request with multiple validation errors on update")
+  void shouldReturnBadRequestWithMultipleErrorsOnUpdate() throws Exception {
+    String token = authenticateAndGetToken();
+
+    CreateNoteRequest updateRequest =
+        new CreateNoteRequest(0L, "");
+
+    mockMvc.perform(
+            put("/notes/{noteId}", 1L)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest))
+        )
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.message").value("Validation failed"))
+        .andExpect(jsonPath("$.errors").isArray())
+        .andExpect(jsonPath("$.errors.length()").value(2))
+        .andExpect(jsonPath("$.errors[*].field")
+            .value(containsInAnyOrder("bookId", "content")));
+  }
+
 }
