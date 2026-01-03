@@ -43,6 +43,11 @@ public class NoteEntity {
     this.updatedAt = updatedAt;
   }
 
+  public NoteEntity(Long id, BookEntity book, String content, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+    this(book, content, createdAt, updatedAt);
+    this.id = id;
+  }
+
   public Long getId() {
     return id;
   }
