@@ -16,4 +16,5 @@ public interface NoteGateway {
 
   Optional<Note> getNoteByIdAndBookIdAndUserId(Long bookId, Long noteId, UUID userId);
 
+  int deleteNote(Long bookID, Long noteId, UUID userId);
 }
