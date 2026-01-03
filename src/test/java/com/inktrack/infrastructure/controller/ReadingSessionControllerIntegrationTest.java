@@ -9,6 +9,7 @@ import com.inktrack.infrastructure.dtos.user.LoginRequest;
 import com.inktrack.infrastructure.entity.ReadingSessionEntity;
 import com.inktrack.infrastructure.entity.UserEntity;
 import com.inktrack.infrastructure.persistence.BookRepository;
+import com.inktrack.infrastructure.persistence.NoteRepository;
 import com.inktrack.infrastructure.persistence.ReadingSessionRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +55,10 @@ class ReadingSessionControllerIntegrationTest {
   @Autowired
   private ReadingSessionRepository readingSessionRepository;
 
+  @Autowired
+  private NoteRepository noteRepository;
+
+
   @BeforeEach
   void setup() {
     mockMvc = MockMvcBuilders
@@ -67,6 +72,7 @@ class ReadingSessionControllerIntegrationTest {
 
   @BeforeEach
   void cleanDatabase() {
+    noteRepository.deleteAllInBatch();
     readingSessionRepository.deleteAllInBatch();
     bookRepository.deleteAllInBatch();
     userRepository.deleteAllInBatch();
