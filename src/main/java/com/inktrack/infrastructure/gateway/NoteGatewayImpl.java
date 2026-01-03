@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -33,7 +34,7 @@ public class NoteGatewayImpl implements NoteGateway {
 
   @Override
   public PageResult<Note> getNotesByBooidAndUserId(Long bookId, UUID userId, int page) {
-    Pageable pageRequest = PageRequest.of(page, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
+    Pageable pageRequest = PageRequest.of(page, 5, Sort.by(Sort.Direction.DESC, "updatedAt"));
     Page<NoteEntity> pageEntity = noteRepository.findByBookIdAndUserId(bookId, userId, pageRequest);
 
     return new PageResult<>(
@@ -44,5 +45,11 @@ public class NoteGatewayImpl implements NoteGateway {
             .map(noteMapper::entityToDomain)
             .toList()
     );
+  }
+
+  @Override
+  public Optional<Note> getNoteByIdAndBookIdAndUserId(Long bookId, Long noteId, UUID userId) {
+    Optional<NoteEntity> entityOptional = noteRepository.findByNoteIdBookIdUserId(noteId, bookId, userId);
+    return entityOptional.map(noteMapper::entityToDomain);
   }
 }

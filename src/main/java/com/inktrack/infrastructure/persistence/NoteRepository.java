@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface NoteRepository extends JpaRepository<NoteEntity, Long> {
@@ -22,4 +23,13 @@ public interface NoteRepository extends JpaRepository<NoteEntity, Long> {
       @Param("userId") UUID userId,
       Pageable pageable
   );
+
+  @Query("""
+         SELECT n
+         FROM NoteEntity n
+         WHERE n.book.id = :bookId
+         AND n.id = :noteId
+         AND n.book.user.id = :userId
+      """)
+  Optional<NoteEntity> findByNoteIdBookIdUserId(Long noteId, Long bookId, UUID userId);
 }
