@@ -7,7 +7,12 @@ import com.inktrack.InkTrackApplication;
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
 import com.inktrack.infrastructure.dtos.user.LoginRequest;
 import com.inktrack.infrastructure.dtos.user.RefreshTokenRequest;
+import com.inktrack.infrastructure.persistence.BookRepository;
+import com.inktrack.infrastructure.persistence.NoteRepository;
+import com.inktrack.infrastructure.persistence.ReadingSessionRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
@@ -28,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(classes = InkTrackApplication.class)
 @ActiveProfiles("test")
-@Transactional
 class AuthControllerIntegrationTest {
 
   @Autowired
@@ -41,14 +44,29 @@ class AuthControllerIntegrationTest {
   @Autowired
   private UserRepository userRepository;
 
+  @Autowired
+  private BookRepository bookRepository;
+
+  @Autowired
+  private NoteRepository noteRepository;
+
+  @Autowired
+  private ReadingSessionRepository readingSessionRepository;
+
   @BeforeEach
   void setUp() {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
     objectMapper = new ObjectMapper();
     objectMapper.findAndRegisterModules();
+  }
 
-    userRepository.deleteAll();
+  @AfterEach
+  void tearDown() {
+    noteRepository.deleteAllInBatch();
+    readingSessionRepository.deleteAllInBatch();
+    bookRepository.deleteAllInBatch();
+    userRepository.deleteAllInBatch();
   }
 
   @Test

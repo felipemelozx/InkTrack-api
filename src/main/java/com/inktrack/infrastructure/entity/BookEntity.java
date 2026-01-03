@@ -23,7 +23,7 @@ public class BookEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false)
   @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
 
@@ -139,14 +139,6 @@ public class BookEntity {
     }
 
     public BookEntity build() {
-      if (user == null || title == null || author == null || totalPages <= 0) {
-        throw new IllegalStateException("User, title and author are required");
-      }
-
-      if (progress != null && (progress < 0 || progress > 100)) {
-        throw new IllegalStateException("Progress must be between 0 and 100");
-      }
-
       return new BookEntity(this);
     }
   }
