@@ -18,6 +18,8 @@ import com.inktrack.core.usecases.book.UpdateBookUseCase;
 import com.inktrack.core.usecases.book.UpdateBookUseCaseImpl;
 import com.inktrack.core.usecases.note.CreateNoteUseCase;
 import com.inktrack.core.usecases.note.CreateNoteUseCaseImpl;
+import com.inktrack.core.usecases.note.DeleteNoteUseCase;
+import com.inktrack.core.usecases.note.DeleteNoteUseCaseImpl;
 import com.inktrack.core.usecases.note.GetNotePaginatorUseCase;
 import com.inktrack.core.usecases.note.GetNotePaginatorUseCaseImpl;
 import com.inktrack.core.usecases.note.UpdateNoteUseCase;
@@ -124,6 +126,11 @@ public class BeansConfig {
   @Bean
   public UpdateNoteUseCase updateNoteUseCase(NoteGateway noteGateway) {
     return new UpdateNoteUseCaseImpl(noteGateway);
+  }
+
+  @Bean
+  public DeleteNoteUseCase deleteNoteUseCase(NoteGateway noteGateway) {
+    return new DeleteNoteUseCaseImpl(noteGateway);
   }
 
   @Bean
