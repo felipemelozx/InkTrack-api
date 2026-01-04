@@ -1,6 +1,7 @@
 package com.inktrack.infrastructure.beans;
 
 import com.inktrack.core.gateway.BookGateway;
+import com.inktrack.core.gateway.CategoryGateway;
 import com.inktrack.core.gateway.JwtGateway;
 import com.inktrack.core.gateway.NoteGateway;
 import com.inktrack.core.gateway.PasswordGateway;
@@ -16,6 +17,8 @@ import com.inktrack.core.usecases.book.GetBooksUseCase;
 import com.inktrack.core.usecases.book.GetBooksUseCaseImpl;
 import com.inktrack.core.usecases.book.UpdateBookUseCase;
 import com.inktrack.core.usecases.book.UpdateBookUseCaseImpl;
+import com.inktrack.core.usecases.category.GetCategoryByIdUseCase;
+import com.inktrack.core.usecases.category.GetCategoryByIdUseCaseImpl;
 import com.inktrack.core.usecases.note.CreateNoteUseCase;
 import com.inktrack.core.usecases.note.CreateNoteUseCaseImpl;
 import com.inktrack.core.usecases.note.DeleteNoteUseCase;
@@ -131,6 +134,11 @@ public class BeansConfig {
   @Bean
   public DeleteNoteUseCase deleteNoteUseCase(NoteGateway noteGateway) {
     return new DeleteNoteUseCaseImpl(noteGateway);
+  }
+
+  @Bean
+  public GetCategoryByIdUseCase getCategoryByIdUseCase(CategoryGateway categoryGateway) {
+    return new GetCategoryByIdUseCaseImpl(categoryGateway);
   }
 
   @Bean
