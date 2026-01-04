@@ -208,7 +208,7 @@ class BookGatewayIntegrationTest {
     createAndSaveBook("Banco de Dados", 150);
 
     OrderEnum order = OrderEnum.TITLE_ASC;
-    GetBookFilter filter = new GetBookFilter(0, 2, "", order);
+    GetBookFilter filter = new GetBookFilter(0, 2, "", null, order);
 
     List<Book> result = bookGateway.getUserBooksPage(savedUser.getId(), filter);
 
@@ -225,7 +225,7 @@ class BookGatewayIntegrationTest {
     createAndSaveBook("Banco de Dados", 150);
 
     OrderEnum order = OrderEnum.TITLE_DESC;
-    GetBookFilter filter = new GetBookFilter(0, 2, "", order);
+    GetBookFilter filter = new GetBookFilter(0, 2, "", null, order);
 
     List<Book> result = bookGateway.getUserBooksPage(savedUser.getId(), filter);
 
