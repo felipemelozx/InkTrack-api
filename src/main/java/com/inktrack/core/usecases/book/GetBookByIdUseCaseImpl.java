@@ -2,6 +2,7 @@ package com.inktrack.core.usecases.book;
 
 import com.inktrack.core.domain.Book;
 import com.inktrack.core.gateway.BookGateway;
+import com.inktrack.core.usecases.category.CategoryOutput;
 import com.inktrack.core.usecases.user.UserOutput;
 
 import java.util.UUID;
@@ -26,9 +27,15 @@ public class GetBookByIdUseCaseImpl implements GetBookByIdUseCase {
         book.getUser().getEmail(),
         book.getUser().getCreatedAt()
     );
+    CategoryOutput categoryOutput = new CategoryOutput(
+        book.getCategory().id(),
+        book.getCategory().name(),
+        book.getCategory().createdAt()
+    );
     return new BookModelOutput(
         book.getId(),
         userOutput,
+        categoryOutput,
         book.getTitle(),
         book.getAuthor(),
         book.getTotalPages(),
