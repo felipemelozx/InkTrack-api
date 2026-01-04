@@ -18,5 +18,7 @@ public interface BookGateway {
 
   long countUserBooks(UUID userId);
 
+  long countUserBooksWithFilters(UUID userId, String title, Long categoryId);
+
   boolean deleteByIdAndUserId(Long bookId, UUID userId);
 }
