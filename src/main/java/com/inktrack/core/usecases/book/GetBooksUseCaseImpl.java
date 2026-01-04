@@ -24,7 +24,7 @@ public class GetBooksUseCaseImpl implements GetBooksUseCase {
         filter
     );
 
-    Long total = bookGateway.countUserBooks(userId);
+    Long total = bookGateway.countUserBooksWithFilters(userId, filter.title(), filter.categoryId());
 
     Integer totalPages = (int) Math.ceil((double) total / filter.size());
 
