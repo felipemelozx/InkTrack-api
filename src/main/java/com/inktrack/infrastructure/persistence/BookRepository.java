@@ -16,15 +16,31 @@ public interface BookRepository extends JpaRepository<BookEntity, Long> {
   Optional<BookEntity> findByIdAndUserId(@Param("id") Long id,@Param("userId") UUID userId);
 
   @Query("""
-        SELECT b 
-        FROM BookEntity b 
+        SELECT b
+        FROM BookEntity b
         WHERE b.user.id = :userId
           AND (:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%')))
+          AND (:categoryId IS NULL OR b.category.id = :categoryId)
       """)
-  List<BookEntity> getUserBookPage(@Param("userId") UUID userId, @Param("title") String title, Pageable pageable);
+  List<BookEntity> getUserBookPage(
+      @Param("userId") UUID userId,
+      @Param("title") String title,
+      @Param("categoryId") Long categoryId,
+      Pageable pageable
+  );
 
-  @Query("SELECT COUNT(b) FROM BookEntity b WHERE b.user.id = :userId")
-  long countUserBooks(@Param("userId") UUID userId);
+  @Query("""
+        SELECT COUNT(b)
+        FROM BookEntity b
+        WHERE b.user.id = :userId
+          AND (:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%')))
+          AND (:categoryId IS NULL OR b.category.id = :categoryId)
+      """)
+  long countUserBooks(
+      @Param("userId") UUID userId,
+      @Param("title") String title,
+      @Param("categoryId") Long categoryId
+  );
 
   @Modifying
   @Query("""
