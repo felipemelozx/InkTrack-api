@@ -12,11 +12,13 @@ class ReadingSessionTest {
 
   private Book createTestBook() {
     User user = new User(java.util.UUID.randomUUID(), "User", "user@email.com", "pass", java.time.LocalDateTime.now());
+    Category category = new Category(1L, "Fiction", OffsetDateTime.now());
     return Book.builder()
         .title("Title")
         .author("Author")
         .totalPages(100)
         .user(user)
+        .category(category)
         .build();
   }
 
