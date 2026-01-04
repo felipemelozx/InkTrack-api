@@ -65,13 +65,13 @@ public class BeansConfig {
   }
 
   @Bean
-  public CreateBookUseCase createBookUseCase(BookGateway bookGateway) {
-    return new CreateBookUseCaseImpl(bookGateway);
+  public CreateBookUseCase createBookUseCase(BookGateway bookGateway, CategoryGateway categoryGateway) {
+    return new CreateBookUseCaseImpl(bookGateway, categoryGateway);
   }
 
   @Bean
-  public UpdateBookUseCase updateBookUseCase(BookGateway bookGateway) {
-    return new UpdateBookUseCaseImpl(bookGateway);
+  public UpdateBookUseCase updateBookUseCase(BookGateway bookGateway, CategoryGateway categoryGateway) {
+    return new UpdateBookUseCaseImpl(bookGateway, categoryGateway);
   }
 
   @Bean

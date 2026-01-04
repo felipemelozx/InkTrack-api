@@ -1,6 +1,7 @@
 package com.inktrack.infrastructure.dtos.book;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record BookCreateRequest(
@@ -9,6 +10,8 @@ public record BookCreateRequest(
     @NotBlank
     String author,
     @Positive
-    int totalPages
+    int totalPages,
+    @NotNull
+    Long categoryId
 ) {
 }

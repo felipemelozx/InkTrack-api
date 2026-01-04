@@ -27,6 +27,10 @@ public class BookEntity {
   @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
 
+  @ManyToOne(fetch = FetchType.EAGER, optional = false)
+  @JoinColumn(name = "category_id", nullable = false)
+  private CategoryEntity category;
+
   @Column(nullable = false)
   private String title;
 
@@ -55,6 +59,7 @@ public class BookEntity {
   private BookEntity(Builder builder) {
     this.id = builder.id;
     this.user = builder.user;
+    this.category = builder.category;
     this.title = builder.title;
     this.author = builder.author;
     this.totalPages = builder.totalPages;
@@ -83,6 +88,7 @@ public class BookEntity {
 
     private Long id;
     private UserEntity user;
+    private CategoryEntity category;
     private String title;
     private String author;
     private Integer totalPages;
@@ -100,6 +106,11 @@ public class BookEntity {
 
     public Builder user(UserEntity user) {
       this.user = user;
+      return this;
+    }
+
+    public Builder category(CategoryEntity category) {
+      this.category = category;
       return this;
     }
 
@@ -149,6 +160,10 @@ public class BookEntity {
 
   public UserEntity getUser() {
     return user;
+  }
+
+  public CategoryEntity getCategory() {
+    return category;
   }
 
   public String getTitle() {
