@@ -1,6 +1,7 @@
 package com.inktrack.core.usecases.book;
 
 import com.inktrack.core.domain.Book;
+import com.inktrack.core.domain.Category;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.gateway.BookGateway;
 import com.inktrack.core.utils.PageResult;
@@ -33,11 +34,13 @@ class GetBooksUseCaseImplTest {
 
   private UUID userId;
   private GetBookFilter filter;
+  private Category validCategory;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
     filter = new GetBookFilter(0, 10, "", OrderEnum.RECENT);
+    validCategory = new Category(1L, "FICTION", OffsetDateTime.now());
   }
 
   @Test
@@ -54,6 +57,7 @@ class GetBooksUseCaseImplTest {
     Book book = Book.builder()
         .id(1L)
         .user(user)
+        .category(validCategory)
         .title("Clean Code")
         .author("Robert C. Martin")
         .totalPages(464)
@@ -126,6 +130,7 @@ class GetBooksUseCaseImplTest {
     Book book = Book.builder()
         .id(1L)
         .user(user)
+        .category(validCategory)
         .title("Any Book")
         .author("Any Author")
         .totalPages(100)
@@ -160,6 +165,7 @@ class GetBooksUseCaseImplTest {
     Book book = Book.builder()
         .id(10L)
         .user(user)
+        .category(validCategory)
         .title("DDD")
         .author("Eric Evans")
         .totalPages(500)

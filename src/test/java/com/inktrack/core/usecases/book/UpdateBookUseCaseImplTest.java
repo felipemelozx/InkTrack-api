@@ -1,8 +1,10 @@
 package com.inktrack.core.usecases.book;
 
 import com.inktrack.core.domain.Book;
+import com.inktrack.core.domain.Category;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.gateway.BookGateway;
+import com.inktrack.core.gateway.CategoryGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,14 +29,19 @@ class UpdateBookUseCaseImplTest {
   @Mock
   private BookGateway bookGateway;
 
+  @Mock
+  private CategoryGateway categoryGateway;
+
   private UpdateBookUseCase updateBookUseCase;
 
   private User validUser;
+  private Category validCategory;
 
   @BeforeEach
   void setUp() {
-    updateBookUseCase = new UpdateBookUseCaseImpl(bookGateway);
+    updateBookUseCase = new UpdateBookUseCaseImpl(bookGateway, categoryGateway);
     validUser = new User(UUID.randomUUID(), "Test User", "test@email.com", "Password123!", LocalDateTime.now());
+    validCategory = new Category(1L, "FICTION", OffsetDateTime.now());
   }
 
   @Test
@@ -43,6 +51,7 @@ class UpdateBookUseCaseImplTest {
     Book bookSaved = Book.builder()
         .id(1L)
         .user(validUser)
+        .category(validCategory)
         .title("Clean Code")
         .author("Robert C. Martin")
         .totalPages(464)
@@ -51,7 +60,9 @@ class UpdateBookUseCaseImplTest {
         .updatedAt(sevenDaysBeforeToday)
         .build();
 
-    BookModelInput input = new BookModelInput("Clean Code Pdf", "Robert C. Martin", 500);
+    BookModelInput input = new BookModelInput("Clean Code Pdf", "Robert C. Martin", 500, 1L);
+
+    when(categoryGateway.getById(1L)).thenReturn(Optional.of(validCategory));
 
     when(bookGateway.findByIdAndUserId(bookSaved.getId(), validUser.getId())).thenReturn(bookSaved);
 
@@ -62,6 +73,7 @@ class UpdateBookUseCaseImplTest {
       return Book.builder()
           .id(b.getId())
           .user(b.getUser())
+          .category(b.getCategory())
           .title(b.getTitle())
           .author(b.getAuthor())
           .totalPages(b.getTotalPages())

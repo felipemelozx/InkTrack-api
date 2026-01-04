@@ -1,6 +1,7 @@
 package com.inktrack.core.usecases.book;
 
 import com.inktrack.core.domain.Book;
+import com.inktrack.core.domain.Category;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.gateway.BookGateway;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,10 +32,13 @@ class GetBookByIdUseCaseImplTest {
 
   private User validUser;
 
+  private Category validCategory;
+
   @BeforeEach
   void setUp() {
     getBookByIdUseCase = new GetBookByIdUseCaseImpl(bookGateway);
     validUser = new User(UUID.randomUUID(), "Test User", "test@email.com", "Password123!", LocalDateTime.now());
+    validCategory = new Category(1L, "FICTION", OffsetDateTime.now());
   }
 
   @Test
@@ -46,6 +50,7 @@ class GetBookByIdUseCaseImplTest {
     Book book = Book.builder()
         .id(bookId)
         .user(validUser)
+        .category(validCategory)
         .title("Clean Code")
         .author("Robert C. Martin")
         .totalPages(300)
@@ -73,6 +78,10 @@ class GetBookByIdUseCaseImplTest {
     assertEquals(validUser.getId(), output.user().id());
     assertEquals(validUser.getName(), output.user().name());
     assertEquals(validUser.getEmail(), output.user().email());
+
+    assertEquals(validCategory.id(), output.category().id());
+    assertEquals(validCategory.name(), output.category().name());
+    assertEquals(validCategory.createdAt(), output.category().createdAt());
 
     verify(bookGateway)
         .findByIdAndUserId(bookId, validUser.getId());
