@@ -17,6 +17,8 @@ import com.inktrack.core.usecases.book.GetBooksUseCase;
 import com.inktrack.core.usecases.book.GetBooksUseCaseImpl;
 import com.inktrack.core.usecases.book.UpdateBookUseCase;
 import com.inktrack.core.usecases.book.UpdateBookUseCaseImpl;
+import com.inktrack.core.usecases.category.GetAllCategoryUseCase;
+import com.inktrack.core.usecases.category.GetAllCategoryUseCaseImpl;
 import com.inktrack.core.usecases.category.GetCategoryByIdUseCase;
 import com.inktrack.core.usecases.category.GetCategoryByIdUseCaseImpl;
 import com.inktrack.core.usecases.note.CreateNoteUseCase;
@@ -139,6 +141,11 @@ public class BeansConfig {
   @Bean
   public GetCategoryByIdUseCase getCategoryByIdUseCase(CategoryGateway categoryGateway) {
     return new GetCategoryByIdUseCaseImpl(categoryGateway);
+  }
+
+  @Bean
+  public GetAllCategoryUseCase getAllCategoryUseCase(CategoryGateway categoryGateway) {
+    return new GetAllCategoryUseCaseImpl(categoryGateway);
   }
 
   @Bean
