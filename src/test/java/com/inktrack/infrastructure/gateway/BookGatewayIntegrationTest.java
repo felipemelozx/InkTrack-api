@@ -2,15 +2,19 @@ package com.inktrack.infrastructure.gateway;
 
 import com.inktrack.InkTrackApplication;
 import com.inktrack.core.domain.Book;
+import com.inktrack.core.domain.Category;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.exception.BookNotFoundException;
 import com.inktrack.core.usecases.book.GetBookFilter;
 import com.inktrack.core.usecases.book.OrderEnum;
 import com.inktrack.infrastructure.entity.BookEntity;
+import com.inktrack.infrastructure.entity.CategoryEntity;
 import com.inktrack.infrastructure.entity.UserEntity;
 import com.inktrack.infrastructure.mapper.BookMapper;
+import com.inktrack.infrastructure.mapper.CategoryMapper;
 import com.inktrack.infrastructure.mapper.UserMapper;
 import com.inktrack.infrastructure.persistence.BookRepository;
+import com.inktrack.infrastructure.persistence.CategoryRepository;
 import com.inktrack.infrastructure.persistence.ReadingSessionRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,14 +48,22 @@ class BookGatewayIntegrationTest {
   private ReadingSessionRepository readingSessionRepository;
 
   @Autowired
+  private CategoryRepository categoryRepository;
+
+  @Autowired
   private BookMapper bookMapper;
 
   @Autowired
   private UserMapper userMapper;
 
+  @Autowired
+  private CategoryMapper categoryMapper;
+
   private BookGatewayImpl bookGateway;
 
   private User savedUser;
+
+  private Category savedCategory;
 
   @BeforeEach
   void setUp() {
@@ -68,6 +81,11 @@ class BookGatewayIntegrationTest {
         userRepository.save(userMapper.domainToEntity(user));
 
     savedUser = userMapper.entityToDomain(savedEntity);
+
+    CategoryEntity categoryEntity = categoryRepository.save(
+        new CategoryEntity(null, "Fiction", OffsetDateTime.now())
+    );
+    savedCategory = categoryMapper.entityToDomain(categoryEntity);
   }
 
   @BeforeEach
@@ -75,12 +93,14 @@ class BookGatewayIntegrationTest {
     readingSessionRepository.deleteAllInBatch();
     bookRepository.deleteAllInBatch();
     userRepository.deleteAllInBatch();
+    categoryRepository.deleteAllInBatch();
   }
 
   @Test
   void shouldSaveBookSuccessfully() {
     Book book = Book.builder()
         .user(savedUser)
+        .category(savedCategory)
         .title("Clean Code")
         .author("Robert C. Martin")
         .totalPages(450)
@@ -105,6 +125,7 @@ class BookGatewayIntegrationTest {
   void shouldFindBookByIdAndUserId() {
     Book book = Book.builder()
         .user(savedUser)
+        .category(savedCategory)
         .title("Domain-Driven Design")
         .author("Eric Evans")
         .totalPages(560)
@@ -137,6 +158,7 @@ class BookGatewayIntegrationTest {
   void shouldNotFindBookFromAnotherUser() {
     Book book = Book.builder()
         .user(savedUser)
+        .category(savedCategory)
         .title("Refactoring")
         .author("Martin Fowler")
         .totalPages(420)
@@ -157,6 +179,7 @@ class BookGatewayIntegrationTest {
   void shouldUpdateBookSuccessfully() {
     Book book = Book.builder()
         .user(savedUser)
+        .category(savedCategory)
         .title("Effective Java")
         .author("Joshua Bloch")
         .totalPages(380)
@@ -221,7 +244,7 @@ class BookGatewayIntegrationTest {
         userRepository.save(new UserEntity(null, "Other", "other@mail.com", "SomePassword132#"))
     );
     Book otherBook = Book.builder()
-        .user(otherUser).title("Other Book").author("X").totalPages(10).build();
+        .user(otherUser).category(savedCategory).title("Other Book").author("X").totalPages(10).build();
     bookGateway.save(otherBook);
 
     long count = bookGateway.countUserBooks(savedUser.getId());
@@ -232,6 +255,7 @@ class BookGatewayIntegrationTest {
   private void createAndSaveBook(String title, int pages) {
     Book book = Book.builder()
         .user(savedUser)
+        .category(savedCategory)
         .title(title)
         .author("Test Author")
         .totalPages(pages)
