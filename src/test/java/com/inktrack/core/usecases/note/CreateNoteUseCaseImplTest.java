@@ -1,6 +1,7 @@
 package com.inktrack.core.usecases.note;
 
 import com.inktrack.core.domain.Book;
+import com.inktrack.core.domain.Category;
 import com.inktrack.core.domain.Note;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.exception.FieldDomainValidationException;
@@ -56,6 +57,7 @@ class CreateNoteUseCaseImplTest {
     validBook = Book.builder()
         .id(1L)
         .user(validUser)
+        .category(new Category(1L, "Fiction", OffsetDateTime.now()))
         .title("Some title")
         .author("Some author")
         .totalPages(100)
