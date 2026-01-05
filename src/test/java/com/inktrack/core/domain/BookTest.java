@@ -3,6 +3,8 @@ package com.inktrack.core.domain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.OffsetDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BookTest {
@@ -12,15 +14,21 @@ class BookTest {
         java.time.LocalDateTime.now());
   }
 
+  private Category createTestCategory() {
+    return new Category(1L, "FICTION", OffsetDateTime.now());
+  }
+
   @Test
   @DisplayName("Should create book when data is valid")
   void shouldCreateBookWhenDataIsValid() {
     User user = createTestUser();
+    Category category = createTestCategory();
     Book book = Book.builder()
         .title("Title")
         .author("Author")
         .totalPages(100)
         .user(user)
+        .category(category)
         .build();
 
     assertEquals("Title", book.getTitle());
@@ -28,44 +36,50 @@ class BookTest {
     assertEquals(100, book.getTotalPages());
     assertEquals(0, book.getPagesRead());
     assertEquals(user, book.getUser());
+    assertEquals(category, book.getCategory());
   }
 
   @Test
   @DisplayName("Should throw exception when totalPages is zero or negative")
   void shouldThrowExceptionWhenTotalPagesIsInvalid() {
     User user = createTestUser();
+    Category category = createTestCategory();
     assertThrows(IllegalArgumentException.class,
-        () -> Book.builder().totalPages(0).user(user).title("T").author("A").build());
+        () -> Book.builder().totalPages(0).user(user).title("T").author("A").category(category).build());
     assertThrows(IllegalArgumentException.class,
-        () -> Book.builder().totalPages(-1).user(user).title("T").author("A").build());
+        () -> Book.builder().totalPages(-1).user(user).title("T").author("A").category(category).build());
   }
 
   @Test
   @DisplayName("Should throw exception when pagesRead is negative or greater than totalPages")
   void shouldThrowExceptionWhenPagesReadIsInvalid() {
     User user = createTestUser();
+    Category category = createTestCategory();
     assertThrows(IllegalArgumentException.class,
-        () -> Book.builder().totalPages(100).pagesRead(-1).user(user).title("T").author("A").build());
+        () -> Book.builder().totalPages(100).pagesRead(-1).user(user).title("T").author("A").category(category).build());
     assertThrows(IllegalArgumentException.class,
-        () -> Book.builder().totalPages(100).pagesRead(101).user(user).title("T").author("A").build());
+        () -> Book.builder().totalPages(100).pagesRead(101).user(user).title("T").author("A").category(category).build());
   }
 
   @Test
   @DisplayName("Should throw exception when user, title or author is null")
   void shouldThrowExceptionWhenRequiredFieldsAreNull() {
     User user = createTestUser();
+    Category category = createTestCategory();
     assertThrows(NullPointerException.class,
-        () -> Book.builder().totalPages(100).user(null).title("T").author("A").build());
+        () -> Book.builder().totalPages(100).user(null).title("T").author("A").category(category).build());
     assertThrows(NullPointerException.class,
-        () -> Book.builder().totalPages(100).user(user).title(null).author("A").build());
+        () -> Book.builder().totalPages(100).user(user).title(null).author("A").category(category).build());
     assertThrows(NullPointerException.class,
-        () -> Book.builder().totalPages(100).user(user).title("T").author(null).build());
+        () -> Book.builder().totalPages(100).user(user).title("T").author(null).category(category).build());
+    assertThrows(NullPointerException.class,
+        () -> Book.builder().totalPages(100).user(user).title("T").author("A").category(null).build());
   }
 
   @Test
   @DisplayName("Should add pages read successfully")
   void shouldAddPagesRead() {
-    Book book = Book.builder().totalPages(100).user(createTestUser()).title("T").author("A").build();
+    Book book = Book.builder().totalPages(100).user(createTestUser()).title("T").author("A").category(createTestCategory()).build();
     book.addPagesRead(10);
     assertEquals(10, book.getPagesRead());
 
@@ -76,7 +90,7 @@ class BookTest {
   @Test
   @DisplayName("Should throw exception when adding negative pages or exceeding total")
   void shouldThrowExceptionWhenAddingInvalidPages() {
-    Book book = Book.builder().totalPages(100).pagesRead(90).user(createTestUser()).title("T").author("A").build();
+    Book book = Book.builder().totalPages(100).pagesRead(90).user(createTestUser()).title("T").author("A").category(createTestCategory()).build();
     assertThrows(IllegalArgumentException.class, () -> book.addPagesRead(-1));
     assertThrows(IllegalArgumentException.class, () -> book.addPagesRead(11));
   }
@@ -84,7 +98,7 @@ class BookTest {
   @Test
   @DisplayName("Should remove pages read successfully")
   void shouldRemovePagesRead() {
-    Book book = Book.builder().totalPages(100).pagesRead(50).user(createTestUser()).title("T").author("A").build();
+    Book book = Book.builder().totalPages(100).pagesRead(50).user(createTestUser()).title("T").author("A").category(createTestCategory()).build();
     book.removePagesRead(10);
     assertEquals(40, book.getPagesRead());
 
@@ -95,7 +109,7 @@ class BookTest {
   @Test
   @DisplayName("Should throw exception when removing negative pages or resulting in negative pagesRead")
   void shouldThrowExceptionWhenRemovingInvalidPages() {
-    Book book = Book.builder().totalPages(100).pagesRead(10).user(createTestUser()).title("T").author("A").build();
+    Book book = Book.builder().totalPages(100).pagesRead(10).user(createTestUser()).title("T").author("A").category(createTestCategory()).build();
     assertThrows(IllegalArgumentException.class, () -> book.removePagesRead(-1));
     assertThrows(IllegalArgumentException.class, () -> book.removePagesRead(11));
   }
@@ -103,7 +117,7 @@ class BookTest {
   @Test
   @DisplayName("Should calculate progress correctly")
   void shouldCalculateProgress() {
-    Book book = Book.builder().totalPages(200).pagesRead(50).user(createTestUser()).title("T").author("A").build();
+    Book book = Book.builder().totalPages(200).pagesRead(50).user(createTestUser()).title("T").author("A").category(createTestCategory()).build();
     assertEquals(25, book.getProgress());
 
     book.addPagesRead(50);
