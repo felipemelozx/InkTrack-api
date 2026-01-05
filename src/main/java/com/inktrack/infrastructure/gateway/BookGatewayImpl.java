@@ -29,7 +29,7 @@ public class BookGatewayImpl implements BookGateway {
     this.bookMapper = bookMapper;
   }
 
-  @Override
+@Override
   @Transactional
   public Book save(Book book) {
     BookEntity bookEntity = bookMapper.domainToEntity(book);
@@ -88,5 +88,32 @@ public class BookGatewayImpl implements BookGateway {
   public boolean deleteByIdAndUserId(Long bookId, UUID userId) {
     int linesAffected = bookRepository.deleteByIdAndUserId(bookId, userId);
     return linesAffected > 0;
+  }
+
+  @Override
+  public int getTotalBooksByUserId(UUID userId) {
+    return bookRepository.countTotalBooksByUserId(userId);
+  }
+
+  @Override
+  public double getAverageProgressByUserId(UUID userId) {
+    Double avgProgress = bookRepository.getAverageProgressByUserId(userId);
+    return avgProgress != null ? avgProgress : 0.0;
+  }
+
+  @Override
+  public int getTotalPagesRemainingByUserId(UUID userId) {
+    Integer totalPagesRemaining = bookRepository.getTotalPagesRemainingByUserId(userId);
+    return totalPagesRemaining != null ? totalPagesRemaining : 0;
+  }
+
+  @Override
+  public List<CategoryBookCount> getBooksCountByCategory(UUID userId) {
+    return bookRepository.getBooksCountByCategory(userId).stream()
+        .map(projection -> new CategoryBookCount(
+            projection.getCategory(),
+            projection.getCount()
+        ))
+        .toList();
   }
 }

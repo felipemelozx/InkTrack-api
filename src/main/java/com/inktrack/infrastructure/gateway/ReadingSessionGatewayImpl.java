@@ -13,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -76,6 +78,39 @@ public class ReadingSessionGatewayImpl implements ReadingSessionGateway {
   @Transactional
   public int deleteReadingSession(Long sessionId, UUID userId, Long bookId) {
     return readingSessionRepository.deleteByIdAndUserId(sessionId, bookId, userId);
+  }
+
+  @Override
+  public int getTotalSessionsByUserId(UUID userId) {
+    return readingSessionRepository.countTotalSessionsByUserId(userId);
+  }
+
+  @Override
+  public long getTotalMinutesByUserId(UUID userId) {
+    Long totalMinutes = readingSessionRepository.getTotalMinutesByUserId(userId);
+    return totalMinutes != null ? totalMinutes : 0L;
+  }
+
+  @Override
+  public Double getAveragePagesPerMinuteByUserId(UUID userId) {
+    Double avg = readingSessionRepository.getAveragePagesPerMinuteByUserId(userId);
+    return avg != null ? avg : 0.0;
+  }
+
+  @Override
+  public Double getAveragePagesPerSessionByUserId(UUID userId) {
+    Double avg = readingSessionRepository.getAveragePagesPerSessionByUserId(userId);
+    return avg != null ? avg : 0.0;
+  }
+
+  @Override
+  public List<EvolutionData> getReadingEvolution(UUID userId, LocalDate startDate) {
+    return readingSessionRepository.getReadingEvolution(userId, startDate).stream()
+        .map(projection -> new EvolutionData(
+            projection.getDate(),
+            projection.getTotalPages() != null ? projection.getTotalPages() : 0
+        ))
+        .toList();
   }
 
 }
