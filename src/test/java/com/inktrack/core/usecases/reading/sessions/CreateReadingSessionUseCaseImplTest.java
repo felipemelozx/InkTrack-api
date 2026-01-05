@@ -1,6 +1,7 @@
 package com.inktrack.core.usecases.reading.sessions;
 
 import com.inktrack.core.domain.Book;
+import com.inktrack.core.domain.Category;
 import com.inktrack.core.domain.ReadingSession;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.exception.FieldDomainValidationException;
@@ -46,6 +47,7 @@ class CreateReadingSessionUseCaseImplTest {
     validBook = Book.builder()
         .id(1l)
         .user(validUser)
+        .category(new Category(1L, "Fiction", OffsetDateTime.now()))
         .pagesRead(0)
         .totalPages(100)
         .author("some author")

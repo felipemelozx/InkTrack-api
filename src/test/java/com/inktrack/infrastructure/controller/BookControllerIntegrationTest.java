@@ -6,7 +6,9 @@ import com.inktrack.infrastructure.dtos.book.BookCreateRequest;
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
 import com.inktrack.infrastructure.dtos.user.LoginRequest;
 import com.inktrack.infrastructure.entity.BookEntity;
+import com.inktrack.infrastructure.entity.CategoryEntity;
 import com.inktrack.infrastructure.persistence.BookRepository;
+import com.inktrack.infrastructure.persistence.CategoryRepository;
 import com.inktrack.infrastructure.persistence.NoteRepository;
 import com.inktrack.infrastructure.persistence.ReadingSessionRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
@@ -61,6 +63,11 @@ class BookControllerIntegrationTest {
   @Autowired
   private NoteRepository noteRepository;
 
+  @Autowired
+  private CategoryRepository categoryRepository;
+
+  private Long testCategoryId;
+
   @BeforeEach
   void setUp() {
     mockMvc = MockMvcBuilders
@@ -78,6 +85,11 @@ class BookControllerIntegrationTest {
     readingRepository.deleteAllInBatch();
     bookRepository.deleteAllInBatch();
     userRepository.deleteAllInBatch();
+    categoryRepository.deleteAllInBatch();
+
+    // Create default category for tests
+    CategoryEntity category = categoryRepository.save(new CategoryEntity(null, "Fiction", java.time.OffsetDateTime.now()));
+    testCategoryId = category.getId();
   }
 
   private String authenticateAndGetToken() throws Exception {
@@ -125,7 +137,7 @@ class BookControllerIntegrationTest {
 
   private long createBook(String token, String title) throws Exception {
     BookCreateRequest request =
-        new BookCreateRequest(title, "Robert C. Martin", 464);
+        new BookCreateRequest(title, "Robert C. Martin", 464, testCategoryId);
 
     String createBookResponse = mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)
@@ -148,7 +160,7 @@ class BookControllerIntegrationTest {
   void shouldCreateBookSuccessfully() throws Exception {
     String token = authenticateAndGetToken();
 
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
 
     createBook(token, request);
 
@@ -160,7 +172,7 @@ class BookControllerIntegrationTest {
   @Test
   @DisplayName("Should return Forbidden when not authenticated")
   void shouldReturnForbiddenWhenNotAuthenticated() throws Exception {
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
 
     mockMvc.perform(post("/books")
             .contentType(MediaType.APPLICATION_JSON)
@@ -173,7 +185,7 @@ class BookControllerIntegrationTest {
   void shouldReturnBadRequestWhenTitleIsMissing() throws Exception {
     String token = authenticateAndGetToken();
 
-    BookCreateRequest request = new BookCreateRequest("", "Robert C. Martin", 464);
+    BookCreateRequest request = new BookCreateRequest("", "Robert C. Martin", 464, testCategoryId);
 
     mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)
@@ -187,7 +199,7 @@ class BookControllerIntegrationTest {
   void shouldReturnBadRequestWhenAuthorIsMissing() throws Exception {
     String token = authenticateAndGetToken();
 
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "", 464);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "", 464, testCategoryId);
 
     mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)
@@ -201,7 +213,7 @@ class BookControllerIntegrationTest {
   void shouldUpdateBookSuccessfully() throws Exception {
     String token = authenticateAndGetToken();
 
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
 
     createBook(token, request);
 
@@ -210,7 +222,7 @@ class BookControllerIntegrationTest {
     assert books.get(0).getTitle().equals("Clean Code");
 
     Long bookId = books.get(0).getId();
-    BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500);
+    BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500, testCategoryId);
 
     mockMvc.perform(put("/books/" + bookId)
             .header("Authorization", "Bearer " + token)
@@ -234,7 +246,7 @@ class BookControllerIntegrationTest {
   void shouldThrowsBookNotFoundException() throws Exception {
     String token = authenticateAndGetToken();
     UUID userId = userRepository.findAll().get(0).getId();
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
 
     createBook(token, request);
 
@@ -243,7 +255,7 @@ class BookControllerIntegrationTest {
     assert books.get(0).getTitle().equals("Clean Code");
 
     Long bookId = books.get(0).getId();
-    BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500);
+    BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500, testCategoryId);
     Long invalidBookId = bookId + 1;
     mockMvc.perform(put("/books/" + invalidBookId)
             .header("Authorization", "Bearer " + token)
@@ -268,7 +280,7 @@ class BookControllerIntegrationTest {
   void shouldReturnBooksWithDefaultFilters() throws Exception {
     String token = authenticateAndGetToken();
     BookCreateRequest request =
-        new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
+        new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
 
     createBook(token, request);
     createBook(token, request);
@@ -361,7 +373,7 @@ class BookControllerIntegrationTest {
   @DisplayName("Should return book with id valid")
   void shouldReturnBookWithValidId() throws Exception {
     String token = authenticateAndGetToken();
-    BookCreateRequest request = new BookCreateRequest("Clean code", "Unclo bob", 400);
+    BookCreateRequest request = new BookCreateRequest("Clean code", "Unclo bob", 400, testCategoryId);
 
     Long bookId = createBook(token, request);
 
@@ -401,7 +413,7 @@ class BookControllerIntegrationTest {
         .asText();
 
     BookCreateRequest bookRequest =
-        new BookCreateRequest("Clean Code", "Robert C. Martin", 464);
+        new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
 
     Long bookId = createBook(tokenUserA, bookRequest);
 

@@ -1,6 +1,7 @@
 package com.inktrack.core.usecases.book;
 
 import com.inktrack.core.domain.Book;
+import com.inktrack.core.domain.Category;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.gateway.BookGateway;
 import com.inktrack.core.utils.PageResult;
@@ -33,11 +34,13 @@ class GetBooksUseCaseImplTest {
 
   private UUID userId;
   private GetBookFilter filter;
+  private Category validCategory;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
-    filter = new GetBookFilter(0, 10, "", OrderEnum.RECENT);
+    filter = new GetBookFilter(0, 10, "", null, OrderEnum.RECENT);
+    validCategory = new Category(1L, "FICTION", OffsetDateTime.now());
   }
 
   @Test
@@ -54,6 +57,7 @@ class GetBooksUseCaseImplTest {
     Book book = Book.builder()
         .id(1L)
         .user(user)
+        .category(validCategory)
         .title("Clean Code")
         .author("Robert C. Martin")
         .totalPages(464)
@@ -65,7 +69,7 @@ class GetBooksUseCaseImplTest {
     when(bookGateway.getUserBooksPage(userId, filter))
         .thenReturn(List.of(book));
 
-    when(bookGateway.countUserBooks(userId))
+    when(bookGateway.countUserBooksWithFilters(userId, "", null))
         .thenReturn(1L);
 
     PageResult<BookModelOutput> result =
@@ -83,7 +87,7 @@ class GetBooksUseCaseImplTest {
     assertEquals(464, output.totalPages());
 
     verify(bookGateway).getUserBooksPage(userId, filter);
-    verify(bookGateway).countUserBooks(userId);
+    verify(bookGateway).countUserBooksWithFilters(userId, "", null);
   }
 
   @Test
@@ -92,7 +96,7 @@ class GetBooksUseCaseImplTest {
     when(bookGateway.getUserBooksPage(userId, filter))
         .thenReturn(List.of());
 
-    when(bookGateway.countUserBooks(userId))
+    when(bookGateway.countUserBooksWithFilters(userId, "", null))
         .thenReturn(0L);
 
     PageResult<BookModelOutput> result =
@@ -105,7 +109,7 @@ class GetBooksUseCaseImplTest {
     assertEquals(0, result.currentPage());
 
     verify(bookGateway).getUserBooksPage(userId, filter);
-    verify(bookGateway).countUserBooks(userId);
+    verify(bookGateway).countUserBooksWithFilters(userId, "", null);
   }
 
 
@@ -113,7 +117,7 @@ class GetBooksUseCaseImplTest {
   @DisplayName("Should calculate total pages correctly")
   void execute_shouldCalculateTotalPagesCorrectly() {
     GetBookFilter customFilter =
-        new GetBookFilter(0, 5, "", OrderEnum.RECENT);
+        new GetBookFilter(0, 5, "", null, OrderEnum.RECENT);
 
     User user = new User(
         userId,
@@ -126,6 +130,7 @@ class GetBooksUseCaseImplTest {
     Book book = Book.builder()
         .id(1L)
         .user(user)
+        .category(validCategory)
         .title("Any Book")
         .author("Any Author")
         .totalPages(100)
@@ -137,7 +142,7 @@ class GetBooksUseCaseImplTest {
     when(bookGateway.getUserBooksPage(userId, customFilter))
         .thenReturn(List.of(book));
 
-    when(bookGateway.countUserBooks(userId))
+    when(bookGateway.countUserBooksWithFilters(userId, "", null))
         .thenReturn(12L);
 
     PageResult<BookModelOutput> result =
@@ -160,6 +165,7 @@ class GetBooksUseCaseImplTest {
     Book book = Book.builder()
         .id(10L)
         .user(user)
+        .category(validCategory)
         .title("DDD")
         .author("Eric Evans")
         .totalPages(500)
@@ -171,7 +177,7 @@ class GetBooksUseCaseImplTest {
     when(bookGateway.getUserBooksPage(userId, filter))
         .thenReturn(List.of(book));
 
-    when(bookGateway.countUserBooks(userId))
+    when(bookGateway.countUserBooksWithFilters(userId, "", null))
         .thenReturn(1L);
 
     PageResult<BookModelOutput> result =

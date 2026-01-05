@@ -67,7 +67,7 @@ public class BookGatewayImpl implements BookGateway {
         sort
     );
 
-    return bookRepository.getUserBookPage(userId, filter.title(), pageable)
+    return bookRepository.getUserBookPage(userId, filter.title(), filter.categoryId(), pageable)
         .stream()
         .map(bookMapper::entityToDomain)
         .toList();
@@ -75,7 +75,12 @@ public class BookGatewayImpl implements BookGateway {
 
   @Override
   public long countUserBooks(UUID userId) {
-    return bookRepository.countUserBooks(userId);
+    return bookRepository.countUserBooks(userId, null, null);
+  }
+
+  @Override
+  public long countUserBooksWithFilters(UUID userId, String title, Long categoryId) {
+    return bookRepository.countUserBooks(userId, title, categoryId);
   }
 
   @Override
