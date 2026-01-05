@@ -3,6 +3,8 @@ package com.inktrack.core.gateway;
 import com.inktrack.core.domain.ReadingSession;
 import com.inktrack.core.utils.PageResult;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,5 +19,18 @@ public interface ReadingSessionGateway {
   ReadingSession update(ReadingSession readingSession);
 
   int deleteReadingSession(Long sessionId, UUID userId, Long bookId);
+
+  int getTotalSessionsByUserId(UUID userId);
+
+  long getTotalMinutesByUserId(UUID userId);
+
+  Double getAveragePagesPerMinuteByUserId(UUID userId);
+
+  Double getAveragePagesPerSessionByUserId(UUID userId);
+
+  List<EvolutionData> getReadingEvolution(UUID userId, LocalDate startDate);
+
+  record EvolutionData(LocalDate date, int totalPages) {
+  }
 
 }
