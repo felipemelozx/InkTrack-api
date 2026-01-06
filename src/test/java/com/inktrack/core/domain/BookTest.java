@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BookTest {
 
@@ -42,38 +43,85 @@ class BookTest {
   @Test
   @DisplayName("Should throw exception when totalPages is zero or negative")
   void shouldThrowExceptionWhenTotalPagesIsInvalid() {
-    User user = createTestUser();
-    Category category = createTestCategory();
-    assertThrows(IllegalArgumentException.class,
-        () -> Book.builder().totalPages(0).user(user).title("T").author("A").category(category).build());
-    assertThrows(IllegalArgumentException.class,
-        () -> Book.builder().totalPages(-1).user(user).title("T").author("A").category(category).build());
+    assertThrows(IllegalArgumentException.class, () -> createBookWithTotalPages(0));
+    assertThrows(IllegalArgumentException.class, () -> createBookWithTotalPages(-1));
+  }
+
+  private Book createBookWithTotalPages(int totalPages) {
+    return Book.builder()
+        .totalPages(totalPages)
+        .user(createTestUser())
+        .title("T")
+        .author("A")
+        .category(createTestCategory())
+        .build();
   }
 
   @Test
   @DisplayName("Should throw exception when pagesRead is negative or greater than totalPages")
   void shouldThrowExceptionWhenPagesReadIsInvalid() {
-    User user = createTestUser();
-    Category category = createTestCategory();
-    assertThrows(IllegalArgumentException.class,
-        () -> Book.builder().totalPages(100).pagesRead(-1).user(user).title("T").author("A").category(category).build());
-    assertThrows(IllegalArgumentException.class,
-        () -> Book.builder().totalPages(100).pagesRead(101).user(user).title("T").author("A").category(category).build());
+    assertThrows(IllegalArgumentException.class, () -> createBookWithPagesRead(-1));
+    assertThrows(IllegalArgumentException.class, () -> createBookWithPagesRead(101));
+  }
+
+  private Book createBookWithPagesRead(int pagesRead) {
+    return Book.builder()
+        .totalPages(100)
+        .pagesRead(pagesRead)
+        .user(createTestUser())
+        .title("T")
+        .author("A")
+        .category(createTestCategory())
+        .build();
   }
 
   @Test
   @DisplayName("Should throw exception when user, title or author is null")
   void shouldThrowExceptionWhenRequiredFieldsAreNull() {
-    User user = createTestUser();
-    Category category = createTestCategory();
-    assertThrows(NullPointerException.class,
-        () -> Book.builder().totalPages(100).user(null).title("T").author("A").category(category).build());
-    assertThrows(NullPointerException.class,
-        () -> Book.builder().totalPages(100).user(user).title(null).author("A").category(category).build());
-    assertThrows(NullPointerException.class,
-        () -> Book.builder().totalPages(100).user(user).title("T").author(null).category(category).build());
-    assertThrows(NullPointerException.class,
-        () -> Book.builder().totalPages(100).user(user).title("T").author("A").category(null).build());
+    assertThrows(NullPointerException.class, this::createBookWithNullUser);
+    assertThrows(NullPointerException.class, this::createBookWithNullTitle);
+    assertThrows(NullPointerException.class, this::createBookWithNullAuthor);
+    assertThrows(NullPointerException.class, this::createBookWithNullCategory);
+  }
+
+  private Book createBookWithNullUser() {
+    return Book.builder()
+        .totalPages(100)
+        .user(null)
+        .title("T")
+        .author("A")
+        .category(createTestCategory())
+        .build();
+  }
+
+  private Book createBookWithNullTitle() {
+    return Book.builder()
+        .totalPages(100)
+        .user(createTestUser())
+        .title(null)
+        .author("A")
+        .category(createTestCategory())
+        .build();
+  }
+
+  private Book createBookWithNullAuthor() {
+    return Book.builder()
+        .totalPages(100)
+        .user(createTestUser())
+        .title("T")
+        .author(null)
+        .category(createTestCategory())
+        .build();
+  }
+
+  private Book createBookWithNullCategory() {
+    return Book.builder()
+        .totalPages(100)
+        .user(createTestUser())
+        .title("T")
+        .author("A")
+        .category(null)
+        .build();
   }
 
   @Test
