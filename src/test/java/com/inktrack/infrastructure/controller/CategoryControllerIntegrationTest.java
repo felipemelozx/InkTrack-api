@@ -3,7 +3,10 @@ package com.inktrack.infrastructure.controller;
 
 import com.inktrack.InkTrackApplication;
 import com.inktrack.infrastructure.entity.CategoryEntity;
+import com.inktrack.infrastructure.persistence.BookRepository;
 import com.inktrack.infrastructure.persistence.CategoryRepository;
+import com.inktrack.infrastructure.persistence.NoteRepository;
+import com.inktrack.infrastructure.persistence.ReadingSessionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +38,15 @@ class CategoryControllerIntegrationTest {
   @Autowired
   private CategoryRepository categoryRepository;
 
+  @Autowired
+  private BookRepository bookRepository;
+
+  @Autowired
+  private NoteRepository noteRepository;
+
+  @Autowired
+  private ReadingSessionRepository readingSessionRepository;
+
   @BeforeEach
   void setup() {
     mockMvc = MockMvcBuilders
@@ -42,6 +54,9 @@ class CategoryControllerIntegrationTest {
         .apply(springSecurity())
         .build();
 
+    noteRepository.deleteAll();
+    readingSessionRepository.deleteAll();
+    bookRepository.deleteAll();
     categoryRepository.deleteAll();
 
     categoryRepository.save(
@@ -60,6 +75,7 @@ class CategoryControllerIntegrationTest {
         )
     );
   }
+
 
 
   @Test

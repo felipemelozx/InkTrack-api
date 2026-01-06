@@ -21,4 +21,15 @@ public interface BookGateway {
   long countUserBooksWithFilters(UUID userId, String title, Long categoryId);
 
   boolean deleteByIdAndUserId(Long bookId, UUID userId);
+
+  int getTotalBooksByUserId(UUID userId);
+
+  double getAverageProgressByUserId(UUID userId);
+
+  int getTotalPagesRemainingByUserId(UUID userId);
+
+  List<CategoryBookCount> getBooksCountByCategory(UUID userId);
+
+  record CategoryBookCount(String categoryName, long bookCount) {
+  }
 }
