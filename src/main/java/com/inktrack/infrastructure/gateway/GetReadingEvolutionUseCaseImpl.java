@@ -7,6 +7,7 @@ import com.inktrack.core.usecases.metrics.ReadingEvolutionOutput;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -25,15 +26,15 @@ public class GetReadingEvolutionUseCaseImpl implements GetReadingEvolutionUseCas
     var evolutionData = readingSessionGateway.getReadingEvolution(userId, startDate);
 
     if (evolutionData == null || evolutionData.isEmpty()) {
-      return new ReadingEvolutionOutput(period.getCode(), new ReadingEvolutionOutput.ReadingEvolutionData[0]);
+      return new ReadingEvolutionOutput(period.getCode(), List.of());
     }
 
-    ReadingEvolutionOutput.ReadingEvolutionData[] data = evolutionData.stream()
+    List<ReadingEvolutionOutput.ReadingEvolutionData> data = evolutionData.stream()
         .map(evo -> new ReadingEvolutionOutput.ReadingEvolutionData(
             evo.date(),
             evo.totalPages()
         ))
-        .toArray(ReadingEvolutionOutput.ReadingEvolutionData[]::new);
+        .toList();
 
     return new ReadingEvolutionOutput(period.getCode(), data);
   }

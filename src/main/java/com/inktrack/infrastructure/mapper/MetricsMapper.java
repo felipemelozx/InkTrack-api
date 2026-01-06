@@ -10,7 +10,6 @@ import com.inktrack.infrastructure.dtos.metrics.ReadingEvolutionResponse;
 import com.inktrack.infrastructure.dtos.metrics.ReadingSessionMetricsResponse;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -49,12 +48,12 @@ public class MetricsMapper {
 
   public ReadingEvolutionResponse readingEvolutionOutputToResponse(
       ReadingEvolutionOutput output) {
-    ReadingEvolutionResponse.ReadingEvolutionData[] data = Arrays.stream(output.data())
+    List<ReadingEvolutionResponse.ReadingEvolutionData> data = output.data().stream()
         .map(evolutionData -> new ReadingEvolutionResponse.ReadingEvolutionData(
             evolutionData.date(),
             evolutionData.pagesRead()
         ))
-        .toArray(ReadingEvolutionResponse.ReadingEvolutionData[]::new);
+        .toList();
 
     return new ReadingEvolutionResponse(output.period(), data);
   }

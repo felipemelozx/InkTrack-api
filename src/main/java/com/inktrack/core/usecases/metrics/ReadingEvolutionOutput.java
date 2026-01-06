@@ -1,10 +1,11 @@
 package com.inktrack.core.usecases.metrics;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record ReadingEvolutionOutput(
     String period,
-    ReadingEvolutionData[] data
+    List<ReadingEvolutionData> data
 ) {
   public record ReadingEvolutionData(
       LocalDate date,
