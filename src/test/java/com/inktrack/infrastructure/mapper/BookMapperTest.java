@@ -9,8 +9,6 @@ import com.inktrack.core.usecases.category.CategoryOutput;
 import com.inktrack.core.usecases.user.UserOutput;
 import com.inktrack.infrastructure.dtos.book.BookCreateRequest;
 import com.inktrack.infrastructure.dtos.book.BookResponse;
-import com.inktrack.infrastructure.dtos.category.CategoryResponse;
-import com.inktrack.infrastructure.dtos.user.UserResponse;
 import com.inktrack.infrastructure.entity.BookEntity;
 import com.inktrack.infrastructure.entity.CategoryEntity;
 import com.inktrack.infrastructure.entity.UserEntity;

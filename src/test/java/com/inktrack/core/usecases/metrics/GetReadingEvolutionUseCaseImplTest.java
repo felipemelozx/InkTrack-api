@@ -58,11 +58,11 @@ class GetReadingEvolutionUseCaseImplTest {
     // Assert
     assertNotNull(output);
     assertEquals(period.getCode(), output.period());
-    assertEquals(2, output.data().length);
-    assertEquals(date1, output.data()[0].date());
-    assertEquals(25, output.data()[0].pagesRead());
-    assertEquals(date2, output.data()[1].date());
-    assertEquals(40, output.data()[1].pagesRead());
+    assertEquals(2, output.data().size());
+    assertEquals(date1, output.data().get(0).date());
+    assertEquals(25, output.data().get(0).pagesRead());
+    assertEquals(date2, output.data().get(1).date());
+    assertEquals(40, output.data().get(1).pagesRead());
 
     verify(readingSessionGateway).getReadingEvolution(eq(userId), any(LocalDate.class));
   }
@@ -88,11 +88,11 @@ class GetReadingEvolutionUseCaseImplTest {
     // Assert
     assertNotNull(output);
     assertEquals(period.getCode(), output.period());
-    assertEquals(2, output.data().length);
-    assertEquals(date1, output.data()[0].date());
-    assertEquals(100, output.data()[0].pagesRead());
-    assertEquals(date2, output.data()[1].date());
-    assertEquals(150, output.data()[1].pagesRead());
+    assertEquals(2, output.data().size());
+    assertEquals(date1, output.data().get(0).date());
+    assertEquals(100, output.data().get(0).pagesRead());
+    assertEquals(date2, output.data().get(1).date());
+    assertEquals(150, output.data().get(1).pagesRead());
   }
 
   @Test
@@ -114,9 +114,9 @@ class GetReadingEvolutionUseCaseImplTest {
     // Assert
     assertNotNull(output);
     assertEquals(period.getCode(), output.period());
-    assertEquals(1, output.data().length);
-    assertEquals(date1, output.data()[0].date());
-    assertEquals(200, output.data()[0].pagesRead());
+    assertEquals(1, output.data().size());
+    assertEquals(date1, output.data().get(0).date());
+    assertEquals(200, output.data().get(0).pagesRead());
   }
 
   @Test
@@ -140,7 +140,7 @@ class GetReadingEvolutionUseCaseImplTest {
     // Assert
     assertNotNull(output);
     assertEquals(period.getCode(), output.period());
-    assertEquals(2, output.data().length);
+    assertEquals(2, output.data().size());
   }
 
   @Test
@@ -158,7 +158,7 @@ class GetReadingEvolutionUseCaseImplTest {
     // Assert
     assertNotNull(output);
     assertEquals(period.getCode(), output.period());
-    assertEquals(0, output.data().length);
+    assertEquals(0, output.data().size());
   }
 
   @Test
@@ -175,7 +175,7 @@ class GetReadingEvolutionUseCaseImplTest {
     // Assert
     assertNotNull(output);
     assertEquals(period.getCode(), output.period());
-    assertEquals(0, output.data().length);
+    assertEquals(0, output.data().size());
   }
 
   @Test
@@ -197,9 +197,9 @@ class GetReadingEvolutionUseCaseImplTest {
     // Assert
     assertNotNull(output);
     assertEquals(period.getCode(), output.period());
-    assertEquals(1, output.data().length);
-    assertEquals(date1, output.data()[0].date());
-    assertEquals(30, output.data()[0].pagesRead());
+    assertEquals(1, output.data().size());
+    assertEquals(date1, output.data().get(0).date());
+    assertEquals(30, output.data().get(0).pagesRead());
   }
 
   @Test
@@ -224,9 +224,9 @@ class GetReadingEvolutionUseCaseImplTest {
 
     // Assert
     assertNotNull(output);
-    assertEquals(3, output.data().length);
-    assertEquals(date1, output.data()[0].date());
-    assertEquals(date2, output.data()[1].date());
-    assertEquals(date3, output.data()[2].date());
+    assertEquals(3, output.data().size());
+    assertEquals(date1, output.data().get(0).date());
+    assertEquals(date2, output.data().get(1).date());
+    assertEquals(date3, output.data().get(2).date());
   }
 }
