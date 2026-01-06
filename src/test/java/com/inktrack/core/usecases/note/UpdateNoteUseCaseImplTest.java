@@ -113,23 +113,20 @@ class UpdateNoteUseCaseImplTest {
   @Test
   @DisplayName("Should throw ResourceNotFoundException when note does not exist")
   void shouldThrowExceptionWhenNoteNotFound() {
-    NoteInput input = new NoteInput(
-        validBook.getId(),
-        "Updated content"
-    );
-
     when(noteGateway.getNoteByIdAndBookIdAndUserId(
         validBook.getId(),
         validNote.getId(),
         validUserId
     )).thenReturn(Optional.empty());
 
-    ResourceNotFoundException exception = assertThrows(
-        ResourceNotFoundException.class,
-        () -> updateNoteUseCase.execute(validNote.getId(), validUserId, input)
-    );
+    ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, this::executeUpdateNote);
 
     assertEquals("Note", exception.getResource());
     verify(noteGateway, never()).save(any());
+  }
+
+  private NoteOutput executeUpdateNote() {
+    NoteInput input = new NoteInput(validBook.getId(), "Updated content");
+    return updateNoteUseCase.execute(validNote.getId(), validUserId, input);
   }
 }
