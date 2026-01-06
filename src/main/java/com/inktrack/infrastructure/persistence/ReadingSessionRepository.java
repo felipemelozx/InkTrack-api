@@ -67,12 +67,12 @@ public interface ReadingSessionRepository extends JpaRepository<ReadingSessionEn
   Double getAveragePagesPerSessionByUserId(@Param("userId") UUID userId);
 
   @Query("""
-      SELECT r.sessionDate as date, COALESCE(SUM(r.pagesRead), 0) as totalPages
+      SELECT CAST(r.sessionDate AS date) as date, COALESCE(SUM(r.pagesRead), 0) as totalPages
       FROM ReadingSessionEntity r
       WHERE r.book.user.id = :userId
-        AND r.sessionDate >= :startDate
-      GROUP BY r.sessionDate
-      ORDER BY r.sessionDate ASC
+        AND CAST(r.sessionDate AS date) >= :startDate
+      GROUP BY CAST(r.sessionDate AS date)
+      ORDER BY CAST(r.sessionDate AS date) ASC
       """)
   List<ReadingEvolutionProjection> getReadingEvolution(
       @Param("userId") UUID userId,
