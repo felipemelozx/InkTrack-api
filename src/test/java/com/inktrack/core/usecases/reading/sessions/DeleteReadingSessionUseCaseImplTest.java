@@ -94,8 +94,7 @@ class DeleteReadingSessionUseCaseImplTest {
     when(readingSessionGateway.getByIdAndByBookIdAndUserId(readingSessionId, validBook.getId(), userId))
         .thenReturn(Optional.empty());
 
-    ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
-        () -> deleteReadingSessionUseCase.execute(readingSessionId, userId, validBook.getId()));
+    ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, this::executeDeleteReadingSession);
 
     String message = String.format(
         "ReadingSession not found with sessionId=%d, bookId=%d, userId=%s",
@@ -104,6 +103,10 @@ class DeleteReadingSessionUseCaseImplTest {
     assertEquals(message, ex.getMessage());
     assertEquals("ReadingSession", ex.getResource());
     assertEquals("compositeId", ex.getField());
+  }
+
+  private void executeDeleteReadingSession() {
+    deleteReadingSessionUseCase.execute(1L, validUser.getId(), validBook.getId());
   }
 
   @Test
@@ -125,9 +128,12 @@ class DeleteReadingSessionUseCaseImplTest {
     when(readingSessionGateway.deleteReadingSession(readingSessionId, userId, validBook.getId()))
         .thenReturn(0);
 
-    IllegalStateException ex = assertThrows(IllegalStateException.class,
-        () -> deleteReadingSessionUseCase.execute(readingSessionId, userId, validBook.getId()));
+    IllegalStateException ex = assertThrows(IllegalStateException.class, this::executeDeleteForNonExistentSession);
     String message = "ReadingSession was found but could not be deleted. Possible concurrent modification.";
     assertEquals(message, ex.getMessage());
+  }
+
+  private void executeDeleteForNonExistentSession() {
+    deleteReadingSessionUseCase.execute(1L, validUser.getId(), validBook.getId());
   }
 }

@@ -90,24 +90,26 @@ class GetBookByIdUseCaseImplTest {
   @Test
   @DisplayName("Should throw exception when book id is null")
   void execute_shouldThrowException_whenBookIdIsNull() {
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> getBookByIdUseCase.execute(null, validUser.getId())
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, this::executeGetBookWithNullBookId);
 
     assertEquals("Book ID or User ID is null", exception.getMessage());
     verifyNoInteractions(bookGateway);
   }
 
+  private BookModelOutput executeGetBookWithNullBookId() {
+    return getBookByIdUseCase.execute(null, validUser.getId());
+  }
+
   @Test
   @DisplayName("Should throw exception when user id is null")
   void execute_shouldThrowException_whenUserIdIsNull() {
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> getBookByIdUseCase.execute(1L, null)
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, this::executeGetBookWithNullUserId);
 
     assertEquals("Book ID or User ID is null", exception.getMessage());
     verifyNoInteractions(bookGateway);
+  }
+
+  private BookModelOutput executeGetBookWithNullUserId() {
+    return getBookByIdUseCase.execute(1L, null);
   }
 }

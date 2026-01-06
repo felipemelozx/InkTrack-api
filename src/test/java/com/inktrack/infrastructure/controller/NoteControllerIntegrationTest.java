@@ -10,6 +10,7 @@ import com.inktrack.infrastructure.entity.CategoryEntity;
 import com.inktrack.infrastructure.persistence.BookRepository;
 import com.inktrack.infrastructure.persistence.CategoryRepository;
 import com.inktrack.infrastructure.persistence.NoteRepository;
+import com.inktrack.infrastructure.persistence.ReadingSessionRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,10 +26,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -53,6 +54,9 @@ class NoteControllerIntegrationTest {
     private NoteRepository noteRepository;
 
     @Autowired
+    private ReadingSessionRepository readingSessionRepository;
+
+    @Autowired
     private CategoryRepository categoryRepository;
 
     private Long testCategoryId;
@@ -71,6 +75,7 @@ class NoteControllerIntegrationTest {
     @BeforeEach
     void cleanDatabase() {
         noteRepository.deleteAllInBatch();
+        readingSessionRepository.deleteAllInBatch();
         bookRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
         categoryRepository.deleteAllInBatch();
