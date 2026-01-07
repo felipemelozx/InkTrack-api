@@ -1,6 +1,7 @@
 package com.inktrack.core.usecases.note;
 
 import com.inktrack.core.domain.Book;
+import com.inktrack.core.domain.Category;
 import com.inktrack.core.domain.Note;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.exception.ResourceNotFoundException;
@@ -56,6 +57,7 @@ class UpdateNoteUseCaseImplTest {
     validBook = Book.builder()
         .id(1L)
         .user(validUser)
+        .category(new Category(1L, "Fiction", OffsetDateTime.now()))
         .title("Some title")
         .author("Some author")
         .totalPages(100)
@@ -111,23 +113,20 @@ class UpdateNoteUseCaseImplTest {
   @Test
   @DisplayName("Should throw ResourceNotFoundException when note does not exist")
   void shouldThrowExceptionWhenNoteNotFound() {
-    NoteInput input = new NoteInput(
-        validBook.getId(),
-        "Updated content"
-    );
-
     when(noteGateway.getNoteByIdAndBookIdAndUserId(
         validBook.getId(),
         validNote.getId(),
         validUserId
     )).thenReturn(Optional.empty());
 
-    ResourceNotFoundException exception = assertThrows(
-        ResourceNotFoundException.class,
-        () -> updateNoteUseCase.execute(validNote.getId(), validUserId, input)
-    );
+    ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, this::executeUpdateNote);
 
     assertEquals("Note", exception.getResource());
     verify(noteGateway, never()).save(any());
+  }
+
+  private NoteOutput executeUpdateNote() {
+    NoteInput input = new NoteInput(validBook.getId(), "Updated content");
+    return updateNoteUseCase.execute(validNote.getId(), validUserId, input);
   }
 }

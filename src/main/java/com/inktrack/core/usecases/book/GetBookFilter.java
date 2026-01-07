@@ -4,6 +4,7 @@ public record GetBookFilter(
     int page,
     int size,
     String title,
+    Long categoryId,
     OrderEnum orderEnum
 ) {
 }

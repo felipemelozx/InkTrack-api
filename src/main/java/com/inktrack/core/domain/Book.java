@@ -7,6 +7,7 @@ public final class Book {
 
   private final Long id;
   private final User user;
+  private final Category category;
   private final String title;
   private final String author;
   private final int totalPages;
@@ -19,6 +20,7 @@ public final class Book {
 
     this.id = builder.id;
     this.user = builder.user;
+    this.category = builder.category;
     this.title = builder.title;
     this.author = builder.author;
     this.totalPages = builder.totalPages;
@@ -36,6 +38,7 @@ public final class Book {
     }
 
     Objects.requireNonNull(builder.user, "user must not be null");
+    Objects.requireNonNull(builder.category, "category must not be null");
     Objects.requireNonNull(builder.title, "title must not be null");
     Objects.requireNonNull(builder.author, "author must not be null");
   }
@@ -66,6 +69,10 @@ public final class Book {
 
   public User getUser() {
     return user;
+  }
+
+  public Category getCategory() {
+    return category;
   }
 
   public String getTitle() {
@@ -115,6 +122,7 @@ public final class Book {
 
     private Long id;
     private User user;
+    private Category category;
     private String title;
     private String author;
     private int totalPages;
@@ -132,6 +140,11 @@ public final class Book {
 
     public Builder user(User user) {
       this.user = user;
+      return this;
+    }
+
+    public Builder category(Category category) {
+      this.category = category;
       return this;
     }
 
