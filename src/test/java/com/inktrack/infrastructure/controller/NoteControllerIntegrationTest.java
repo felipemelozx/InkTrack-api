@@ -6,8 +6,11 @@ import com.inktrack.infrastructure.dtos.book.BookCreateRequest;
 import com.inktrack.infrastructure.dtos.notes.CreateNoteRequest;
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
 import com.inktrack.infrastructure.dtos.user.LoginRequest;
+import com.inktrack.infrastructure.entity.CategoryEntity;
 import com.inktrack.infrastructure.persistence.BookRepository;
+import com.inktrack.infrastructure.persistence.CategoryRepository;
 import com.inktrack.infrastructure.persistence.NoteRepository;
+import com.inktrack.infrastructure.persistence.ReadingSessionRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,10 +26,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,6 +53,14 @@ class NoteControllerIntegrationTest {
     @Autowired
     private NoteRepository noteRepository;
 
+    @Autowired
+    private ReadingSessionRepository readingSessionRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    private Long testCategoryId;
+
     @BeforeEach
     void setup() {
         mockMvc = MockMvcBuilders
@@ -64,8 +75,12 @@ class NoteControllerIntegrationTest {
     @BeforeEach
     void cleanDatabase() {
         noteRepository.deleteAllInBatch();
+        readingSessionRepository.deleteAllInBatch();
         bookRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
+        categoryRepository.deleteAllInBatch();
+        CategoryEntity category = categoryRepository.save(new CategoryEntity(null, "Fiction", java.time.OffsetDateTime.now()));
+        testCategoryId = category.getId();
     }
 
     private String authenticateAndGetToken() throws Exception {
@@ -136,7 +151,7 @@ class NoteControllerIntegrationTest {
     void shouldCreateNoteWhenDataIsValid() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Effective Java", "Joshua Bloch", 416);
+        BookCreateRequest bookRequest = new BookCreateRequest("Effective Java", "Joshua Bloch", 416, testCategoryId);
         long bookId = createBook(token, bookRequest);
 
         CreateNoteRequest noteRequest = new CreateNoteRequest("This book is essential for every Java developer.");
@@ -196,7 +211,7 @@ class NoteControllerIntegrationTest {
     void shouldGetNotesPaginatedSuccessfully() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Domain-Driven Design", "Eric Evans", 400);
+        BookCreateRequest bookRequest = new BookCreateRequest("Domain-Driven Design", "Eric Evans", 400, testCategoryId);
         long bookId = createBook(token, bookRequest);
 
         createNote(token, bookId, new CreateNoteRequest("Note about aggregates"));
@@ -220,7 +235,7 @@ class NoteControllerIntegrationTest {
     void shouldReturnEmptyListWhenBookHasNoNotes() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Clean Code", "Robert Martin", 464);
+        BookCreateRequest bookRequest = new BookCreateRequest("Clean Code", "Robert Martin", 464, testCategoryId);
         long bookId = createBook(token, bookRequest);
 
         mockMvc.perform(get("/books/" + bookId + "/notes")
@@ -236,7 +251,7 @@ class NoteControllerIntegrationTest {
     void shouldUpdateNoteSuccessfully() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Refactoring", "Martin Fowler", 450);
+        BookCreateRequest bookRequest = new BookCreateRequest("Refactoring", "Martin Fowler", 450, testCategoryId);
         long bookId = createBook(token, bookRequest);
 
         long noteId = createNote(
@@ -280,7 +295,7 @@ class NoteControllerIntegrationTest {
     void shouldReturnBadRequestWhenUpdatingWithBlankContent() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Clean Architecture", "Robert Martin", 350);
+        BookCreateRequest bookRequest = new BookCreateRequest("Clean Architecture", "Robert Martin", 350, testCategoryId);
         long bookId = createBook(token, bookRequest);
 
         long noteId = createNote(
@@ -307,7 +322,7 @@ class NoteControllerIntegrationTest {
     void shouldReturnBadRequestWhenUpdatingWithLongContent() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Java Concurrency", "Brian Goetz", 420);
+        BookCreateRequest bookRequest = new BookCreateRequest("Java Concurrency", "Brian Goetz", 420, testCategoryId);
         long bookId = createBook(token, bookRequest);
 
         long noteId = createNote(
@@ -334,7 +349,7 @@ class NoteControllerIntegrationTest {
     void shouldDeleteNoteSuccessfully() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Design Patterns", "Gang of Four", 395);
+        BookCreateRequest bookRequest = new BookCreateRequest("Design Patterns", "Gang of Four", 395, testCategoryId);
         long bookId = createBook(token, bookRequest);
 
         long noteId = createNote(
@@ -358,7 +373,7 @@ class NoteControllerIntegrationTest {
     void shouldReturnNotFoundWhenDeletingNonExistingNote() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Test Book", "Test Author", 100);
+        BookCreateRequest bookRequest = new BookCreateRequest("Test Book", "Test Author", 100, testCategoryId);
         long bookId = createBook(token, bookRequest);
 
         mockMvc.perform(

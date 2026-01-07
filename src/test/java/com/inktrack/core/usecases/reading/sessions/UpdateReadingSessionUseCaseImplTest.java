@@ -1,6 +1,7 @@
 package com.inktrack.core.usecases.reading.sessions;
 
 import com.inktrack.core.domain.Book;
+import com.inktrack.core.domain.Category;
 import com.inktrack.core.domain.ReadingSession;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.exception.ResourceNotFoundException;
@@ -56,6 +57,7 @@ class UpdateReadingSessionUseCaseImplTest {
         .pagesRead(50)
         .author("Test Author")
         .user(new User(userId, "Test User", "test@test.com", "password123", null))
+        .category(new Category(1L, "Fiction", OffsetDateTime.now()))
         .totalPages(200)
         .build();
 

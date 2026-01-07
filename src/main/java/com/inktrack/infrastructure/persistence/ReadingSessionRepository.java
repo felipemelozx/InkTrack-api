@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,4 +48,34 @@ public interface ReadingSessionRepository extends JpaRepository<ReadingSessionEn
   int deleteByIdAndUserId(@Param("readingId") Long readingSessionId,
                           @Param("bookId") Long bookId,
                           @Param("userId") UUID userId);
+
+  @Query("SELECT COUNT(r) FROM ReadingSessionEntity r WHERE r.book.user.id = :userId")
+  int countTotalSessionsByUserId(@Param("userId") UUID userId);
+
+  @Query("SELECT SUM(r.minutes) FROM ReadingSessionEntity r WHERE r.book.user.id = :userId")
+  Long getTotalMinutesByUserId(@Param("userId") UUID userId);
+
+  @Query("""
+      SELECT AVG(CAST(r.pagesRead AS DOUBLE) / NULLIF(r.minutes, 0))
+      FROM ReadingSessionEntity r
+      WHERE r.book.user.id = :userId
+        AND r.minutes > 0
+      """)
+  Double getAveragePagesPerMinuteByUserId(@Param("userId") UUID userId);
+
+  @Query("SELECT AVG(r.pagesRead) FROM ReadingSessionEntity r WHERE r.book.user.id = :userId")
+  Double getAveragePagesPerSessionByUserId(@Param("userId") UUID userId);
+
+  @Query("""
+      SELECT CAST(r.sessionDate AS date) as date, COALESCE(SUM(r.pagesRead), 0) as totalPages
+      FROM ReadingSessionEntity r
+      WHERE r.book.user.id = :userId
+        AND CAST(r.sessionDate AS date) >= :startDate
+      GROUP BY CAST(r.sessionDate AS date)
+      ORDER BY CAST(r.sessionDate AS date) ASC
+      """)
+  List<ReadingEvolutionProjection> getReadingEvolution(
+      @Param("userId") UUID userId,
+      @Param("startDate") LocalDate startDate
+  );
 }

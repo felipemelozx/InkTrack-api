@@ -1,6 +1,7 @@
 package com.inktrack.core.usecases.book;
 
 import com.inktrack.core.domain.Book;
+import com.inktrack.core.domain.Category;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.gateway.BookGateway;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,10 +32,13 @@ class GetBookByIdUseCaseImplTest {
 
   private User validUser;
 
+  private Category validCategory;
+
   @BeforeEach
   void setUp() {
     getBookByIdUseCase = new GetBookByIdUseCaseImpl(bookGateway);
     validUser = new User(UUID.randomUUID(), "Test User", "test@email.com", "Password123!", LocalDateTime.now());
+    validCategory = new Category(1L, "FICTION", OffsetDateTime.now());
   }
 
   @Test
@@ -46,6 +50,7 @@ class GetBookByIdUseCaseImplTest {
     Book book = Book.builder()
         .id(bookId)
         .user(validUser)
+        .category(validCategory)
         .title("Clean Code")
         .author("Robert C. Martin")
         .totalPages(300)
@@ -74,6 +79,10 @@ class GetBookByIdUseCaseImplTest {
     assertEquals(validUser.getName(), output.user().name());
     assertEquals(validUser.getEmail(), output.user().email());
 
+    assertEquals(validCategory.id(), output.category().id());
+    assertEquals(validCategory.name(), output.category().name());
+    assertEquals(validCategory.createdAt(), output.category().createdAt());
+
     verify(bookGateway)
         .findByIdAndUserId(bookId, validUser.getId());
   }
@@ -81,24 +90,26 @@ class GetBookByIdUseCaseImplTest {
   @Test
   @DisplayName("Should throw exception when book id is null")
   void execute_shouldThrowException_whenBookIdIsNull() {
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> getBookByIdUseCase.execute(null, validUser.getId())
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, this::executeGetBookWithNullBookId);
 
     assertEquals("Book ID or User ID is null", exception.getMessage());
     verifyNoInteractions(bookGateway);
   }
 
+  private BookModelOutput executeGetBookWithNullBookId() {
+    return getBookByIdUseCase.execute(null, validUser.getId());
+  }
+
   @Test
   @DisplayName("Should throw exception when user id is null")
   void execute_shouldThrowException_whenUserIdIsNull() {
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> getBookByIdUseCase.execute(1L, null)
-    );
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, this::executeGetBookWithNullUserId);
 
     assertEquals("Book ID or User ID is null", exception.getMessage());
     verifyNoInteractions(bookGateway);
+  }
+
+  private BookModelOutput executeGetBookWithNullUserId() {
+    return getBookByIdUseCase.execute(1L, null);
   }
 }

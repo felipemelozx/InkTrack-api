@@ -94,6 +94,7 @@ public class BookController {
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "10") Integer size,
       @RequestParam(required = false, defaultValue = "") String title,
+      @RequestParam(required = false) Long categoryId,
       @RequestParam(required = false, defaultValue = "RECENT") OrderEnum sortBy,
       @AuthenticationPrincipal UserEntity currentUser
   ) {
@@ -101,6 +102,7 @@ public class BookController {
         page,
         size,
         title,
+        categoryId,
         sortBy
     );
     PageResult<BookModelOutput> books = getBooksUseCase.execute(currentUser.getId(), filter);
