@@ -256,16 +256,16 @@ graph TB
     GatewayPorts -->|Uses| JWT
     GatewayPorts -->|Uses| Password
 
-    style Core fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    style Driving fill:#fff9c4,stroke:#f9a825,stroke-width:2px
-    style Driven fill:#bbdefb,stroke:#1565c0,stroke-width:2px
-    style Domain fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style UseCases fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
-    style GatewayPorts fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    style Controller fill:#ffffff,stroke:#333,stroke-width:1px
-    style Repos fill:#ffffff,stroke:#333,stroke-width:1px
-    style JWT fill:#ffffff,stroke:#333,stroke-width:1px
-    style Password fill:#ffffff,stroke:#333,stroke-width:1px
+    style Core fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#1b5e20
+    style Driving fill:#fff9c4,stroke:#f9a825,stroke-width:2px,color:#f57f17
+    style Driven fill:#bbdefb,stroke:#1565c0,stroke-width:2px,color:#0d47a1
+    style Domain fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+    style UseCases fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#e65100
+    style GatewayPorts fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c
+    style Controller fill:#ffffff,stroke:#333,stroke-width:1px,color:#000
+    style Repos fill:#ffffff,stroke:#333,stroke-width:1px,color:#000
+    style JWT fill:#ffffff,stroke:#333,stroke-width:1px,color:#000
+    style Password fill:#ffffff,stroke:#333,stroke-width:1px,color:#000
 ```
 
 **Data Flow**:
@@ -366,37 +366,37 @@ String token = JWT.create()
 
 ### Core
 
-<img src="https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=java&logoColor=white" height="20" alt="Java" />
-<img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" height="20" alt="Spring Boot" />
-<img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white" height="20" alt="Spring Security" />
-<img src="https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white" height="20" alt="Spring Data JPA" />
+![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=java&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white)
+![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 
 ### Database & Migration
 
-<img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" height="20" alt="PostgreSQL" />
-<img src="https://img.shields.io/badge/H2-000000?style=for-the-badge&logo=h2&logoColor=white" height="20" alt="H2" />
-<img src="https://img.shields.io/badge/Flyway-CC0000?style=for-the-badge&logo=flyway&logoColor=white" height="20" alt="Flyway" />
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![H2](https://img.shields.io/badge/H2-000000?style=for-the-badge&logo=h2&logoColor=white)
+![Flyway](https://img.shields.io/badge/Flyway-CC0000?style=for-the-badge&logo=flyway&logoColor=white)
 
 ### Security
 
-<img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white" height="20" alt="JWT" />
+![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)
 
 ### Build & Testing
 
-<img src="https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=apache-maven&logoColor=white" height="20" alt="Maven" />
-<img src="https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white" height="20" alt="JUnit 5" />
-<img src="https://img.shields.io/badge/Mockito-EC4213?style=for-the-badge&logo=mockito&logoColor=white" height="20" alt="Mockito" />
+![Maven](https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=apache-maven&logoColor=white)
+![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white)
+![Mockito](https://img.shields.io/badge/Mockito-EC4213?style=for-the-badge&logo=mockito&logoColor=white)
 
 ### Code Quality
 
-<img src="https://img.shields.io/badge/SonarQube-5196CF?style=for-the-badge&logo=sonarqube&logoColor=white" height="20" alt="SonarQube" />
-<img src="https://img.shields.io/badge/JaCoCo-00Bfa5?style=for-the-badge&logo=opengamma&logoColor=white" height="20" alt="JaCoCo" />
-<img src="https://img.shields.io/badge/Checkstyle-EC4213?style=for-the-badge&logo=checkstyle&logoColor=white" height="20" alt="Checkstyle" />
+![SonarQube](https://img.shields.io/badge/SonarQube-5196CF?style=for-the-badge&logo=sonarqube&logoColor=white)
+![JaCoCo](https://img.shields.io/badge/JaCoCo-00Bfa5?style=for-the-badge&logo=opengamma&logoColor=white)
+![Checkstyle](https://img.shields.io/badge/Checkstyle-EC4213?style=for-the-badge&logo=checkstyle&logoColor=white)
 
 ### DevOps
 
-<img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" height="20" alt="Docker" />
-<img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" height="20" alt="GitHub Actions" />
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
 
 ## ▶️ How to Run
 
