@@ -35,7 +35,7 @@ practices.
 
 ## 🚀 Demo
 
-- **Application**: Available upon deployment
+- **Application**: [https://inktrack.netlify.app](https://inktrack.netlify.app/)
 
 ## ✨ Key Features
 
