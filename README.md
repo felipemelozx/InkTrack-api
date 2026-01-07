@@ -15,14 +15,14 @@ practices.
 
 ### Technologies & Build
 
-<img src="https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=java&logoColor=white" height="20" alt="Java" />
-<img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" height="20" alt="Spring Boot" />
-<img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white" height="20" alt="Spring Security" />
-<img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" height="20" alt="PostgreSQL" />
-<img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" height="20" alt="Docker" />
-<img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white" height="20" alt="JWT" />
-<img src="https://img.shields.io/badge/JaCoCo-00Bfa5?style=for-the-badge&logo=opengamma&logoColor=white" height="20" alt="JaCoCo" />
-<img src="https://img.shields.io/badge/SonarQube-5196CF?style=for-the-badge&logo=sonarqube&logoColor=white" height="20" alt="SonarQube" />
+![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=java&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)
+![JaCoCo](https://img.shields.io/badge/JaCoCo-00Bfa5?style=for-the-badge&logo=opengamma&logoColor=white)
+![SonarQube](https://img.shields.io/badge/SonarQube-5196CF?style=for-the-badge&logo=sonarqube&logoColor=white)
 
 ### Quality & CI/CD
 
@@ -233,32 +233,39 @@ Clean Architecture principles.
 
 ```mermaid
 graph TB
-    subgraph "Driving Adapters (Primary)"
-        Controller[REST Controllers]
+    subgraph Driving["Driving Adapters (Primary)"]
+        Controller["🌐 REST Controllers"]
     end
 
-    subgraph "Core Domain"
-        Domain[Domain Entities<br/>User, Book, Note, etc.]
-        UseCases[Use Cases<br/>Business Logic]
-        GatewayPorts[Gateway Port Interfaces]
+    subgraph Core["Core Domain"]
+        Domain["📦 Domain Entities<br/>(User, Book, Note, etc.)"]
+        UseCases["⚙️ Use Cases<br/>(Business Logic)"]
+        GatewayPorts["🔌 Gateway Port Interfaces"]
     end
 
-    subgraph "Driven Adapters (Secondary)"
-        Repos[JPA Repositories]
-        JWT[JWT Implementation]
-        Password[Password Encryption]
+    subgraph Driven["Driven Adapters (Secondary)"]
+        Repos["💾 JPA Repositories"]
+        JWT["🔐 JWT Implementation"]
+        Password["🔒 Password Encryption"]
     end
 
-    Controller --> UseCases
-    UseCases --> Domain
-    UseCases --> GatewayPorts
-    GatewayPorts --> Repos
-    GatewayPorts --> JWT
-    GatewayPorts --> Password
+    Controller -->|HTTP Request| UseCases
+    UseCases -->|Uses| Domain
+    UseCases -->|Calls| GatewayPorts
+    GatewayPorts -->|Implements| Repos
+    GatewayPorts -->|Uses| JWT
+    GatewayPorts -->|Uses| Password
 
-    style Domain fill:#e1f5ff
-    style UseCases fill:#fff4e1
-    style GatewayPorts fill:#f0e1ff
+    style Core fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style Driving fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style Driven fill:#bbdefb,stroke:#1565c0,stroke-width:2px
+    style Domain fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style UseCases fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style GatewayPorts fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style Controller fill:#ffffff,stroke:#333,stroke-width:1px
+    style Repos fill:#ffffff,stroke:#333,stroke-width:1px
+    style JWT fill:#ffffff,stroke:#333,stroke-width:1px
+    style Password fill:#ffffff,stroke:#333,stroke-width:1px
 ```
 
 **Data Flow**:
