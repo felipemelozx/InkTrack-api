@@ -12,6 +12,7 @@ public record BookCreateRequest(
     @Positive
     int totalPages,
     @NotNull
-    Long categoryId
+    Long categoryId,
+    String googleBookId
 ) {
 }
