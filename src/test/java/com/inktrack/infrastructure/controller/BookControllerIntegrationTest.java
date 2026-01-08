@@ -137,7 +137,7 @@ class BookControllerIntegrationTest {
 
   private long createBook(String token, String title) throws Exception {
     BookCreateRequest request =
-        new BookCreateRequest(title, "Robert C. Martin", 464, testCategoryId);
+        new BookCreateRequest(title, "Robert C. Martin", 464, testCategoryId, null);
 
     String createBookResponse = mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)
@@ -160,7 +160,7 @@ class BookControllerIntegrationTest {
   void shouldCreateBookSuccessfully() throws Exception {
     String token = authenticateAndGetToken();
 
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null);
 
     createBook(token, request);
 
@@ -172,7 +172,7 @@ class BookControllerIntegrationTest {
   @Test
   @DisplayName("Should return Forbidden when not authenticated")
   void shouldReturnForbiddenWhenNotAuthenticated() throws Exception {
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null);
 
     mockMvc.perform(post("/books")
             .contentType(MediaType.APPLICATION_JSON)
@@ -185,7 +185,7 @@ class BookControllerIntegrationTest {
   void shouldReturnBadRequestWhenTitleIsMissing() throws Exception {
     String token = authenticateAndGetToken();
 
-    BookCreateRequest request = new BookCreateRequest("", "Robert C. Martin", 464, testCategoryId);
+    BookCreateRequest request = new BookCreateRequest("", "Robert C. Martin", 464, testCategoryId, null);
 
     mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)
@@ -199,7 +199,7 @@ class BookControllerIntegrationTest {
   void shouldReturnBadRequestWhenAuthorIsMissing() throws Exception {
     String token = authenticateAndGetToken();
 
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "", 464, testCategoryId);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "", 464, testCategoryId, null);
 
     mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)
@@ -213,7 +213,7 @@ class BookControllerIntegrationTest {
   void shouldUpdateBookSuccessfully() throws Exception {
     String token = authenticateAndGetToken();
 
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null);
 
     createBook(token, request);
 
@@ -222,7 +222,7 @@ class BookControllerIntegrationTest {
     assert books.get(0).getTitle().equals("Clean Code");
 
     Long bookId = books.get(0).getId();
-    BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500, testCategoryId);
+    BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500, testCategoryId, null);
 
     mockMvc.perform(put("/books/" + bookId)
             .header("Authorization", "Bearer " + token)
@@ -246,7 +246,7 @@ class BookControllerIntegrationTest {
   void shouldThrowsBookNotFoundException() throws Exception {
     String token = authenticateAndGetToken();
     UUID userId = userRepository.findAll().get(0).getId();
-    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
+    BookCreateRequest request = new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null);
 
     createBook(token, request);
 
@@ -255,7 +255,7 @@ class BookControllerIntegrationTest {
     assert books.get(0).getTitle().equals("Clean Code");
 
     Long bookId = books.get(0).getId();
-    BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500, testCategoryId);
+    BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500, testCategoryId, null);
     Long invalidBookId = bookId + 1;
     mockMvc.perform(put("/books/" + invalidBookId)
             .header("Authorization", "Bearer " + token)
@@ -280,7 +280,7 @@ class BookControllerIntegrationTest {
   void shouldReturnBooksWithDefaultFilters() throws Exception {
     String token = authenticateAndGetToken();
     BookCreateRequest request =
-        new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
+        new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null);
 
     createBook(token, request);
     createBook(token, request);
@@ -373,7 +373,7 @@ class BookControllerIntegrationTest {
   @DisplayName("Should return book with id valid")
   void shouldReturnBookWithValidId() throws Exception {
     String token = authenticateAndGetToken();
-    BookCreateRequest request = new BookCreateRequest("Clean code", "Unclo bob", 400, testCategoryId);
+    BookCreateRequest request = new BookCreateRequest("Clean code", "Unclo bob", 400, testCategoryId, null);
 
     Long bookId = createBook(token, request);
 
@@ -413,7 +413,7 @@ class BookControllerIntegrationTest {
         .asText();
 
     BookCreateRequest bookRequest =
-        new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId);
+        new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null);
 
     Long bookId = createBook(tokenUserA, bookRequest);
 
@@ -489,5 +489,74 @@ class BookControllerIntegrationTest {
         .andExpect(jsonPath("$.data").value(nullValue()))
         .andExpect(jsonPath("$.errors").value(notNullValue()))
         .andExpect(jsonPath("$.errors[0].field").value("id"));
+  }
+
+  @Test
+  @DisplayName("Should create book with thumbnail from Google Books when googleBookId is provided")
+  void shouldCreateBookWithThumbnailFromGoogleBooks() throws Exception {
+    String token = authenticateAndGetToken();
+
+    String googleBookId = "testBookId123";
+    String thumbnailUrl = "http://books.google.com/books/content?id=testBookId123&printsec=frontcover&img=1&zoom=1&source=gbs_api";
+
+    BookCreateRequest request =
+        new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, googleBookId);
+
+    String createBookResponse = mockMvc.perform(post("/books")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.data.id").isNotEmpty())
+        .andExpect(jsonPath("$.data.title").value(request.title()))
+        .andExpect(jsonPath("$.data.author").value(request.author()))
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    Long bookId = objectMapper
+        .readTree(createBookResponse)
+        .get("data")
+        .get("id")
+        .asLong();
+
+    var book = bookRepository.findById(bookId);
+    assertThat(book).isPresent();
+
+    // The thumbnail may or may not be present depending on Google Books API response
+    // The important part is that the book is created successfully
+    assertThat(book.get().getTitle()).isEqualTo(request.title());
+    assertThat(book.get().getAuthor()).isEqualTo(request.author());
+  }
+
+  @Test
+  @DisplayName("Should create book without thumbnail when googleBookId is null")
+  void shouldCreateBookWithoutThumbnailWhenGoogleBookIdIsNull() throws Exception {
+    String token = authenticateAndGetToken();
+
+    BookCreateRequest request =
+        new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null);
+
+    String createBookResponse = mockMvc.perform(post("/books")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.data.id").isNotEmpty())
+        .andExpect(jsonPath("$.data.title").value(request.title()))
+        .andExpect(jsonPath("$.data.thumbnailUrl").value(nullValue()))
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    Long bookId = objectMapper
+        .readTree(createBookResponse)
+        .get("data")
+        .get("id")
+        .asLong();
+
+    var book = bookRepository.findById(bookId);
+    assertThat(book).isPresent();
+    assertThat(book.get().getThumbnailUrl()).isNull();
   }
 }

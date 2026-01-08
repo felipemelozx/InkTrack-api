@@ -2,6 +2,7 @@ package com.inktrack.infrastructure.beans;
 
 import com.inktrack.core.gateway.BookGateway;
 import com.inktrack.core.gateway.CategoryGateway;
+import com.inktrack.core.gateway.GoogleBooksGateway;
 import com.inktrack.core.gateway.JwtGateway;
 import com.inktrack.core.gateway.NoteGateway;
 import com.inktrack.core.gateway.PasswordGateway;
@@ -15,6 +16,8 @@ import com.inktrack.core.usecases.book.GetBookByIdUseCase;
 import com.inktrack.core.usecases.book.GetBookByIdUseCaseImpl;
 import com.inktrack.core.usecases.book.GetBooksUseCase;
 import com.inktrack.core.usecases.book.GetBooksUseCaseImpl;
+import com.inktrack.core.usecases.book.SearchBooksUseCase;
+import com.inktrack.core.usecases.book.SearchBooksUseCaseImpl;
 import com.inktrack.core.usecases.book.UpdateBookUseCase;
 import com.inktrack.core.usecases.book.UpdateBookUseCaseImpl;
 import com.inktrack.core.usecases.category.GetAllCategoryUseCase;
@@ -65,8 +68,12 @@ public class BeansConfig {
   }
 
   @Bean
-  public CreateBookUseCase createBookUseCase(BookGateway bookGateway, CategoryGateway categoryGateway) {
-    return new CreateBookUseCaseImpl(bookGateway, categoryGateway);
+  public CreateBookUseCase createBookUseCase(
+      BookGateway bookGateway,
+      CategoryGateway categoryGateway,
+      GoogleBooksGateway googleBooksGateway
+  ) {
+    return new CreateBookUseCaseImpl(bookGateway, categoryGateway, googleBooksGateway);
   }
 
   @Bean
@@ -146,6 +153,11 @@ public class BeansConfig {
   @Bean
   public GetAllCategoryUseCase getAllCategoryUseCase(CategoryGateway categoryGateway) {
     return new GetAllCategoryUseCaseImpl(categoryGateway);
+  }
+
+  @Bean
+  public SearchBooksUseCase searchBooksUseCase(GoogleBooksGateway googleBooksGateway) {
+    return new SearchBooksUseCaseImpl(googleBooksGateway);
   }
 
   @Bean

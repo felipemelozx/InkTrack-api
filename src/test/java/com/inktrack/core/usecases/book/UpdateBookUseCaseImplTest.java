@@ -60,7 +60,7 @@ class UpdateBookUseCaseImplTest {
         .updatedAt(sevenDaysBeforeToday)
         .build();
 
-    BookModelInput input = new BookModelInput("Clean Code Pdf", "Robert C. Martin", 500, 1L);
+    BookModelInput input = new BookModelInput("Clean Code Pdf", "Robert C. Martin", 500, 1L, null);
 
     when(categoryGateway.getById(1L)).thenReturn(Optional.of(validCategory));
 

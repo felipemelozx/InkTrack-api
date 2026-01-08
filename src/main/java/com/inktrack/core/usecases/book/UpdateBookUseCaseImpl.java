@@ -59,6 +59,7 @@ public class UpdateBookUseCaseImpl implements UpdateBookUseCase{
         savedBook.getTotalPages(),
         savedBook.getPagesRead(),
         savedBook.getProgress(),
+        savedBook.getThumbnailUrl(),
         savedBook.getCreatedAt(),
         savedBook.getUpdatedAt()
     );

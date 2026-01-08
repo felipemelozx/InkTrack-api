@@ -4,6 +4,7 @@ public record BookModelInput(
     String title,
     String author,
     int totalPages,
-    Long categoryId
+    Long categoryId,
+    String googleBookId
 ) {
 }

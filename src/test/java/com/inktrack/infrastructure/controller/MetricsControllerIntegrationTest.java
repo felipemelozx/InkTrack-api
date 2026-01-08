@@ -108,7 +108,7 @@ class MetricsControllerIntegrationTest {
   }
 
   private long createBook(String token, String title, int totalPages) throws Exception {
-    BookCreateRequest request = new BookCreateRequest(title, "Author Name", totalPages, testCategoryId);
+    BookCreateRequest request = new BookCreateRequest(title, "Author Name", totalPages, testCategoryId, null);
 
     String createBookResponse = mockMvc.perform(post("/books")
             .header("Authorization", "Bearer " + token)

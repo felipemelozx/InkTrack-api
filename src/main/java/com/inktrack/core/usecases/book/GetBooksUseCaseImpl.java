@@ -51,6 +51,7 @@ public class GetBooksUseCaseImpl implements GetBooksUseCase {
                   b.getTotalPages(),
                   b.getPagesRead(),
                   b.getProgress(),
+                  b.getThumbnailUrl(),
                   b.getCreatedAt(),
                   b.getUpdatedAt()
               );

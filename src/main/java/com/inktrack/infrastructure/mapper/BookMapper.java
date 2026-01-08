@@ -42,6 +42,7 @@ public class BookMapper {
         .totalPages(book.getTotalPages())
         .pagesRead(book.getPagesRead())
         .progress(book.getProgress())
+        .thumbnailUrl(book.getThumbnailUrl())
         .createdAt(book.getCreatedAt())
         .updatedAt(book.getUpdatedAt())
         .build();
@@ -59,6 +60,7 @@ public class BookMapper {
         .author(bookEntity.getAuthor())
         .totalPages(bookEntity.getTotalPages())
         .pagesRead(bookEntity.getPagesRead())
+        .thumbnailUrl(bookEntity.getThumbnailUrl())
         .createdAt(bookEntity.getCreatedAt())
         .updatedAt(bookEntity.getUpdatedAt())
         .build();
@@ -69,7 +71,8 @@ public class BookMapper {
         bookCreateRequest.title(),
         bookCreateRequest.author(),
         bookCreateRequest.totalPages(),
-        bookCreateRequest.categoryId()
+        bookCreateRequest.categoryId(),
+        bookCreateRequest.googleBookId()
     );
   }
 
@@ -90,6 +93,7 @@ public class BookMapper {
         book.getTotalPages(),
         book.getPagesRead(),
         book.getProgress(),
+        book.getThumbnailUrl(),
         book.getCreatedAt(),
         book.getUpdatedAt()
     );
@@ -119,6 +123,7 @@ public class BookMapper {
         bookModelOutPut.totalPages(),
         bookModelOutPut.pagesRead(),
         bookModelOutPut.progress(),
+        bookModelOutPut.thumbnailUrl(),
         bookModelOutPut.createdAt(),
         bookModelOutPut.updatedAt()
     );
