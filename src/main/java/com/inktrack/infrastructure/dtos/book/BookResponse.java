@@ -14,6 +14,8 @@ public record BookResponse(
     int totalPages,
     int pagesRead,
     int progress,
+    String thumbnailUrl,
+    String googleBookId,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt
 ) {
