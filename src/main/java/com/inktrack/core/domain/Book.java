@@ -13,6 +13,7 @@ public final class Book {
   private final int totalPages;
   private int pagesRead;
   private String thumbnailUrl;
+  private String googleBookId;
   private OffsetDateTime createdAt;
   private OffsetDateTime updatedAt;
 
@@ -27,6 +28,7 @@ public final class Book {
     this.totalPages = builder.totalPages;
     this.pagesRead = builder.pagesRead;
     this.thumbnailUrl = builder.thumbnailUrl;
+    this.googleBookId = builder.googleBookId;
     this.createdAt = builder.createdAt;
     this.updatedAt = builder.updatedAt;
   }
@@ -105,6 +107,10 @@ public final class Book {
     return thumbnailUrl;
   }
 
+  public String getGoogleBookId() {
+    return googleBookId;
+  }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -134,6 +140,7 @@ public final class Book {
     private int totalPages;
     private int pagesRead = 0;
     private String thumbnailUrl;
+    private String googleBookId;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -187,6 +194,11 @@ public final class Book {
 
     public Builder thumbnailUrl(String thumbnailUrl) {
       this.thumbnailUrl = thumbnailUrl;
+      return this;
+    }
+
+    public Builder googleBookId(String googleBookId) {
+      this.googleBookId = googleBookId;
       return this;
     }
 

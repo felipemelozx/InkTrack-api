@@ -60,6 +60,7 @@ public class CreateBookUseCaseImpl implements CreateBookUseCase {
         .author(modelInput.author())
         .totalPages(modelInput.totalPages())
         .thumbnailUrl(thumbnailUrl)
+        .googleBookId(modelInput.googleBookId())
         .build();
   }
 
@@ -85,6 +86,7 @@ public class CreateBookUseCaseImpl implements CreateBookUseCase {
         bookSaved.getPagesRead(),
         bookSaved.getProgress(),
         bookSaved.getThumbnailUrl(),
+        bookSaved.getGoogleBookId(),
         bookSaved.getCreatedAt(),
         bookSaved.getUpdatedAt()
     );

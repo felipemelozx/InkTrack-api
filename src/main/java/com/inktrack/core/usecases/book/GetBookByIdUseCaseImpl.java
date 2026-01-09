@@ -42,6 +42,7 @@ public class GetBookByIdUseCaseImpl implements GetBookByIdUseCase {
         book.getPagesRead(),
         book.getProgress(),
         book.getThumbnailUrl(),
+        book.getGoogleBookId(),
         book.getCreatedAt(),
         book.getUpdatedAt()
     );

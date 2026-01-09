@@ -217,6 +217,7 @@ class BookMapperTest {
             150,
             50,
             null,
+            null,
             createdAt,
             updatedAt
         );
