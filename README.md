@@ -41,6 +41,8 @@ practices.
 
 - ✅ **Secure Authentication**: JWT with Access (15min) + Refresh (7 days) token pattern, BCrypt password hashing, CORS configuration
 - ✅ **Book Management**: Full CRUD operations with category organization, supporting unlimited books per user
+- ✅ **Google Books Integration**: Search books via Google Books API, automatic thumbnail fetching, and metadata
+  enrichment
 - ✅ **Reading Progress**: Page-level tracking with automatic progress calculation, reading session history, and completion detection
 - ✅ **Notes System**: Create, update, and delete notes per book with full audit trail (createdAt/updatedAt)
 - ✅ **Advanced Analytics**:
@@ -276,21 +278,47 @@ graph TB
 5. Gateway Implementation → Repository/Service
 6. Response flows back through the layers
 
+### Google Books Integration
+
+The project integrates with Google Books API to provide enhanced book discovery and metadata:
+
+**Architecture**:
+
+- **Gateway Interface**: `GoogleBooksGateway` in core/gateway defines the contract
+- **Implementation**: `GoogleBooksGatewayImpl` in infrastructure/gateway uses Spring's RestClient
+- **Caching**: Responses are cached using Caffeine to reduce API calls (5-minute TTL)
+- **Domain Models**: `GoogleBooksVolume`, `GoogleBooksSearchResponse` for API responses
+
+**Use Cases**:
+
+1. **Book Search**: Search for books by title, author, or ISBN via `GET /books/search`
+2. **Thumbnail Fetching**: Automatically fetch book thumbnails when `googleBookId` is provided
+3. **Metadata Enrichment**: Enhance book records with Google Books metadata
+
+**Configuration**:
+
+- API key configurable via `GOOGLE_BOOKS_API_KEY` environment variable
+- Cache size and timeout configurable
+- Respects API rate limits through caching strategy
+
 ### Project Structure
 
 ```
 src/main/java/com/inktrack/
 ├── core/                          # Domain logic
-│   ├── domain/                    # Domain entities (User, Book, Category, Note, ReadingSession)
+│   ├── domain/                    # Domain entities (User, Book, Category, Note, ReadingSession, GoogleBooksVolume)
 │   ├── exception/                 # Custom exceptions
-│   ├── gateway/                   # Gateway interfaces
+│   ├── gateway/                   # Gateway interfaces (UserGateway, BookGateway, GoogleBooksGateway)
 │   ├── usecases/                  # Use cases (business logic)
+│   │   └── book/                  # Book-specific use cases (SearchBooksUseCase, etc.)
 │   └── utils/                     # Utility classes
 ├── infrastructure/                # Implementation details
+│   ├── config/                    # Configuration classes (GoogleBooksConfig, CacheConfig)
 │   ├── controller/                # REST API controllers
 │   ├── dto/                       # Data Transfer Objects
+│   │   └── book/                  # Book DTOs (BookSearchResponse, etc.)
 │   ├── entity/                    # JPA entities
-│   ├── gateway/                   # Gateway implementations
+│   ├── gateway/                   # Gateway implementations (GoogleBooksGatewayImpl)
 │   ├── mapper/                    # DTO/Domain mappers
 │   ├── persistence/               # Repository interfaces
 │   ├── security/                  # Security configuration
@@ -517,6 +545,12 @@ cp .env.example .env
 - `POSTGRES_USER`: Database username (for production/Docker)
 - `POSTGRES_PASSWORD`: Database password (for production/Docker)
 - `POSTGRES_DB`: Database name (for production/Docker)
+- `GOOGLE_BOOKS_API_KEY`: API key for Google Books API (optional, for enhanced search and thumbnail features)
+- `GOOGLE_BOOKS_API_BASE_URL`: Google Books API base URL (default: https://www.googleapis.com/books/v1)
+- `GOOGLE_BOOKS_MAX_RESULTS`: Maximum search results (default: 10)
+- `GOOGLE_BOOKS_TIMEOUT_MS`: Request timeout in milliseconds (default: 5000)
+- `GOOGLE_BOOKS_CACHE_MAX_SIZE`: Maximum cache entries (default: 100)
+- `GOOGLE_BOOKS_CACHE_EXPIRATION_MINUTES`: Cache expiration in minutes (default: 5)
 
 ## 📚 API Documentation
 
@@ -637,7 +671,8 @@ Authorization: Bearer {accessToken}
   "title": "Clean Code",
   "author": "Robert C. Martin",
   "totalPages": 464,
-  "categoryId": 1
+  "categoryId": 1,
+  "googleBookId": "p-cDwAAQBAJ"
 }
 ```
 
@@ -675,6 +710,8 @@ Content-Type: application/json
 }
 ```
 
+**Note**: When `googleBookId` is provided, the system automatically fetches the book's thumbnail from Google Books API.
+
 #### Get All Books
 
 ```http
@@ -702,6 +739,43 @@ Content-Type: application/json
 }
 ```
 
+#### Search Books (Google Books Integration)
+
+**Request** (Search Books):
+
+```http
+GET /api/v1/books/search?q=clean+code
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "success": true,
+  "message": "Operação realizada com sucesso.",
+  "data": {
+    "total": 128,
+    "items": [
+      {
+        "googleBookId": "p-cDwAAQBAJ",
+        "title": "Clean Code: A Handbook of Agile Software Craftsmanship",
+        "author": "Robert C. Martin",
+        "totalPages": 464,
+        "thumbnailUrl": "http://books.google.com/books/content?id=p-cDwAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+      }
+    ]
+  },
+  "errors": [],
+  "timestamp": "2024-01-15T10:35:00Z"
+}
+```
+
+**Query Parameters:**
+
+- `q` (required): Search query string (e.g., book title, author, ISBN)
+- Returns up to 10 results with book metadata including thumbnails
+
 #### Get Book by ID
 
 ```http
@@ -720,7 +794,8 @@ Authorization: Bearer {accessToken}
   "title": "Clean Code: A Handbook of Agile Software Craftsmanship",
   "author": "Robert C. Martin",
   "totalPages": 464,
-  "categoryId": 1
+  "categoryId": 1,
+  "googleBookId": "p-cDwAAQBAJ"
 }
 ```
 

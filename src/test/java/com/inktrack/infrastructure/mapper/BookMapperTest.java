@@ -129,7 +129,8 @@ class BookMapperTest {
             "Test Book",
             "Test Author",
             300,
-            1L
+            1L,
+            null
         );
 
         BookModelInput modelInput = bookMapper.requestDtoToModelInput(request);
@@ -139,6 +140,7 @@ class BookMapperTest {
         assertEquals(request.author(), modelInput.author());
         assertEquals(request.totalPages(), modelInput.totalPages());
         assertEquals(request.categoryId(), modelInput.categoryId());
+        assertEquals(request.googleBookId(), modelInput.googleBookId());
     }
 
     @Test
@@ -176,7 +178,8 @@ class BookMapperTest {
             "Test Book",
             "Test Author",
             300,
-            1L
+            1L,
+            null
         );
 
         Book book = bookMapper.modelInputToDomain(modelInput, testUser, testCategory);
@@ -213,6 +216,8 @@ class BookMapperTest {
             300,
             150,
             50,
+            null,
+            null,
             createdAt,
             updatedAt
         );

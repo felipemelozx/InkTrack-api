@@ -149,7 +149,7 @@ class ReadingSessionControllerIntegrationTest {
   @Test
   void shouldCreateReadingSessionSuccessfully() throws Exception {
     String accessToken = authenticateAndGetToken();
-    long bookId = createBook(accessToken, new BookCreateRequest("The Pragmatic Programmer", "Andrew Hunt", 352, testCategoryId));
+    long bookId = createBook(accessToken, new BookCreateRequest("The Pragmatic Programmer", "Andrew Hunt", 352, testCategoryId, null));
 
     ReadingSessionCreateRequest request =
         new ReadingSessionCreateRequest(45L, 30);
@@ -180,7 +180,7 @@ class ReadingSessionControllerIntegrationTest {
   @DisplayName("should return the reading session paginated")
   void shouldReturnReadingSessionPaginated() throws Exception {
     String accessToken = authenticateAndGetToken();
-    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId));
+    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null));
 
     ReadingSessionCreateRequest request1 = new ReadingSessionCreateRequest(60L, 50);
     ReadingSessionCreateRequest request2 = new ReadingSessionCreateRequest(30L, 20);
@@ -207,7 +207,7 @@ class ReadingSessionControllerIntegrationTest {
   void shouldReturn404WhenGettingReadingSessionsForNonExistentBook() throws Exception {
     String accessToken = authenticateAndGetToken();
 
-    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId));
+    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null));
     long readingSessionId = createReadingSession(accessToken, bookId, new ReadingSessionCreateRequest(60L, 50));
 
     ReadingSessionCreateRequest requestUpdated = new ReadingSessionCreateRequest(30L, 20);
@@ -236,7 +236,7 @@ class ReadingSessionControllerIntegrationTest {
   @DisplayName("Should return 404 when not found the reading session")
   void shouldReturn404WhenReadingSessionNotFound() throws Exception {
     String accessToken = authenticateAndGetToken();
-    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId));
+    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null));
     ReadingSessionCreateRequest request = new ReadingSessionCreateRequest(60L, 50);
     String expectedMessage = "Reading session not found with id: 1";
     mockMvc.perform(
@@ -255,7 +255,7 @@ class ReadingSessionControllerIntegrationTest {
   @DisplayName("should delete reading session successfully")
   void shouldDeleteReadingSessionSuccessfully() throws Exception {
     String accessToken = authenticateAndGetToken();
-    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId));
+    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null));
     long readingSessionId = createReadingSession(accessToken, bookId, new ReadingSessionCreateRequest(60L, 50));
 
     assertThat(readingSessionRepository.count()).isEqualTo(1);
@@ -274,7 +274,7 @@ class ReadingSessionControllerIntegrationTest {
   @DisplayName("should return 404 when trying to delete a non-existent reading session")
   void shouldReturn404WhenDeletingNonExistentSession() throws Exception {
     String accessToken = authenticateAndGetToken();
-    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId));
+    long bookId = createBook(accessToken, new BookCreateRequest("Clean Code", "Robert C. Martin", 464, testCategoryId, null));
     UserEntity user = userRepository.findAll().get(0);
     String expectedMessage = String.format(
         "ReadingSession not found with sessionId=%d, bookId=%d, userId=%s",
