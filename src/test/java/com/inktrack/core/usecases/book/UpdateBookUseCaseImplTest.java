@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,7 +44,7 @@ class UpdateBookUseCaseImplTest {
 
   @BeforeEach
   void setUp() {
-    updateBookUseCase = new UpdateBookUseCaseImpl(bookGateway, categoryGateway);
+    updateBookUseCase = new UpdateBookUseCaseImpl(bookGateway, categoryGateway, googleBooksGateway);
     validUser = new User(UUID.randomUUID(), "Test User", "test@email.com", "Password123!", LocalDateTime.now());
     validCategory = new Category(1L, "FICTION", OffsetDateTime.now());
   }
@@ -95,6 +96,255 @@ class UpdateBookUseCaseImplTest {
     assertEquals(bookSaved.getCreatedAt(), response.createdAt());
     assertEquals(now, response.updatedAt());
     verify(bookGateway).findByIdAndUserId(bookSaved.getId(), validUser.getId());
+    verify(bookGateway).update(any(Book.class));
+  }
+
+  @Test
+  @DisplayName("Should update thumbnail when Google Book ID changes and API returns thumbnail")
+  void execute_shouldUpdateThumbnail_whenGoogleBookIdChangesAndApiReturnsThumbnail() {
+    OffsetDateTime sevenDaysBeforeToday = OffsetDateTime.now().minusDays(7);
+    String oldThumbnail = "http://old-thumbnail.com.jpg";
+    String newThumbnail = "http://new-thumbnail.com.jpg";
+    String oldGoogleBookId = "oldId123";
+    String newGoogleBookId = "newId456";
+
+    Book bookSaved = Book.builder()
+        .id(1L)
+        .user(validUser)
+        .category(validCategory)
+        .title("Clean Code")
+        .author("Robert C. Martin")
+        .totalPages(464)
+        .pagesRead(0)
+        .thumbnailUrl(oldThumbnail)
+        .googleBookId(oldGoogleBookId)
+        .createdAt(sevenDaysBeforeToday)
+        .updatedAt(sevenDaysBeforeToday)
+        .build();
+
+    BookModelInput input = new BookModelInput("Clean Code", "Robert C. Martin", 464, 1L, newGoogleBookId);
+
+    when(categoryGateway.getById(1L)).thenReturn(Optional.of(validCategory));
+    when(bookGateway.findByIdAndUserId(bookSaved.getId(), validUser.getId())).thenReturn(bookSaved);
+
+    GoogleBooksVolume googleBooksVolume = new GoogleBooksVolume(
+        newGoogleBookId,
+        "Clean Code",
+        List.of("Robert C. Martin"),
+        464,
+        newThumbnail
+    );
+    when(googleBooksGateway.getVolumeById(newGoogleBookId)).thenReturn(Optional.of(googleBooksVolume));
+
+    when(bookGateway.update(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    BookModelOutput response = updateBookUseCase.execute(bookSaved.getId(), input, validUser.getId());
+
+    assertNotNull(response);
+    assertEquals(newThumbnail, response.thumbnailUrl());
+    assertEquals(newGoogleBookId, response.googleBookId());
+    verify(googleBooksGateway).getVolumeById(newGoogleBookId);
+    verify(bookGateway).update(any(Book.class));
+  }
+
+  @Test
+  @DisplayName("Should keep old thumbnail when Google Book ID changes and API returns empty")
+  void execute_shouldKeepOldThumbnail_whenGoogleBookIdChangesAndApiReturnsEmpty() {
+    OffsetDateTime sevenDaysBeforeToday = OffsetDateTime.now().minusDays(7);
+    String oldThumbnail = "http://old-thumbnail.com.jpg";
+    String oldGoogleBookId = "oldId123";
+    String newGoogleBookId = "newId456";
+
+    Book bookSaved = Book.builder()
+        .id(1L)
+        .user(validUser)
+        .category(validCategory)
+        .title("Clean Code")
+        .author("Robert C. Martin")
+        .totalPages(464)
+        .pagesRead(0)
+        .thumbnailUrl(oldThumbnail)
+        .googleBookId(oldGoogleBookId)
+        .createdAt(sevenDaysBeforeToday)
+        .updatedAt(sevenDaysBeforeToday)
+        .build();
+
+    BookModelInput input = new BookModelInput("Clean Code", "Robert C. Martin", 464, 1L, newGoogleBookId);
+
+    when(categoryGateway.getById(1L)).thenReturn(Optional.of(validCategory));
+    when(bookGateway.findByIdAndUserId(bookSaved.getId(), validUser.getId())).thenReturn(bookSaved);
+    when(googleBooksGateway.getVolumeById(newGoogleBookId)).thenReturn(Optional.empty());
+
+    when(bookGateway.update(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    BookModelOutput response = updateBookUseCase.execute(bookSaved.getId(), input, validUser.getId());
+
+    assertNotNull(response);
+    assertEquals(oldThumbnail, response.thumbnailUrl());
+    assertEquals(newGoogleBookId, response.googleBookId());
+    verify(googleBooksGateway).getVolumeById(newGoogleBookId);
+    verify(bookGateway).update(any(Book.class));
+  }
+
+  @Test
+  @DisplayName("Should keep old thumbnail when Google Book ID changes and API throws exception")
+  void execute_shouldKeepOldThumbnail_whenGoogleBookIdChangesAndApiThrowsException() {
+    OffsetDateTime sevenDaysBeforeToday = OffsetDateTime.now().minusDays(7);
+    String oldThumbnail = "http://old-thumbnail.com.jpg";
+    String oldGoogleBookId = "oldId123";
+    String newGoogleBookId = "newId456";
+
+    Book bookSaved = Book.builder()
+        .id(1L)
+        .user(validUser)
+        .category(validCategory)
+        .title("Clean Code")
+        .author("Robert C. Martin")
+        .totalPages(464)
+        .pagesRead(0)
+        .thumbnailUrl(oldThumbnail)
+        .googleBookId(oldGoogleBookId)
+        .createdAt(sevenDaysBeforeToday)
+        .updatedAt(sevenDaysBeforeToday)
+        .build();
+
+    BookModelInput input = new BookModelInput("Clean Code", "Robert C. Martin", 464, 1L, newGoogleBookId);
+
+    when(categoryGateway.getById(1L)).thenReturn(Optional.of(validCategory));
+    when(bookGateway.findByIdAndUserId(bookSaved.getId(), validUser.getId())).thenReturn(bookSaved);
+    when(googleBooksGateway.getVolumeById(newGoogleBookId))
+        .thenThrow(new RuntimeException("API Error"));
+
+    when(bookGateway.update(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    BookModelOutput response = updateBookUseCase.execute(bookSaved.getId(), input, validUser.getId());
+
+    assertNotNull(response);
+    assertEquals(oldThumbnail, response.thumbnailUrl());
+    assertEquals(newGoogleBookId, response.googleBookId());
+    verify(googleBooksGateway).getVolumeById(newGoogleBookId);
+    verify(bookGateway).update(any(Book.class));
+  }
+
+  @Test
+  @DisplayName("Should keep old thumbnail when Google Book ID is null")
+  void execute_shouldKeepOldThumbnail_whenGoogleBookIdIsNull() {
+    OffsetDateTime sevenDaysBeforeToday = OffsetDateTime.now().minusDays(7);
+    String oldThumbnail = "http://old-thumbnail.com.jpg";
+    String oldGoogleBookId = "oldId123";
+
+    Book bookSaved = Book.builder()
+        .id(1L)
+        .user(validUser)
+        .category(validCategory)
+        .title("Clean Code")
+        .author("Robert C. Martin")
+        .totalPages(464)
+        .pagesRead(0)
+        .thumbnailUrl(oldThumbnail)
+        .googleBookId(oldGoogleBookId)
+        .createdAt(sevenDaysBeforeToday)
+        .updatedAt(sevenDaysBeforeToday)
+        .build();
+
+    BookModelInput input = new BookModelInput("Clean Code", "Robert C. Martin", 464, 1L, null);
+
+    when(categoryGateway.getById(1L)).thenReturn(Optional.of(validCategory));
+    when(bookGateway.findByIdAndUserId(bookSaved.getId(), validUser.getId())).thenReturn(bookSaved);
+
+    when(bookGateway.update(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    BookModelOutput response = updateBookUseCase.execute(bookSaved.getId(), input, validUser.getId());
+
+    assertNotNull(response);
+    assertEquals(oldThumbnail, response.thumbnailUrl());
+    // When input googleBookId is null, the book googleBookId is updated to null
+    assertEquals(null, response.googleBookId());
+    verify(googleBooksGateway, org.mockito.Mockito.never()).getVolumeById(org.mockito.Mockito.anyString());
+    verify(bookGateway).update(any(Book.class));
+  }
+
+  @Test
+  @DisplayName("Should keep old thumbnail when Google Book ID is the same")
+  void execute_shouldKeepOldThumbnail_whenGoogleBookIdIsSame() {
+    OffsetDateTime sevenDaysBeforeToday = OffsetDateTime.now().minusDays(7);
+    String oldThumbnail = "http://old-thumbnail.com.jpg";
+    String sameGoogleBookId = "sameId123";
+
+    Book bookSaved = Book.builder()
+        .id(1L)
+        .user(validUser)
+        .category(validCategory)
+        .title("Clean Code")
+        .author("Robert C. Martin")
+        .totalPages(464)
+        .pagesRead(0)
+        .thumbnailUrl(oldThumbnail)
+        .googleBookId(sameGoogleBookId)
+        .createdAt(sevenDaysBeforeToday)
+        .updatedAt(sevenDaysBeforeToday)
+        .build();
+
+    BookModelInput input = new BookModelInput("Clean Code", "Robert C. Martin", 464, 1L, sameGoogleBookId);
+
+    when(categoryGateway.getById(1L)).thenReturn(Optional.of(validCategory));
+    when(bookGateway.findByIdAndUserId(bookSaved.getId(), validUser.getId())).thenReturn(bookSaved);
+
+    when(bookGateway.update(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    BookModelOutput response = updateBookUseCase.execute(bookSaved.getId(), input, validUser.getId());
+
+    assertNotNull(response);
+    assertEquals(oldThumbnail, response.thumbnailUrl());
+    assertEquals(sameGoogleBookId, response.googleBookId());
+    verify(googleBooksGateway, org.mockito.Mockito.never()).getVolumeById(org.mockito.Mockito.anyString());
+    verify(bookGateway).update(any(Book.class));
+  }
+
+  @Test
+  @DisplayName("Should keep old thumbnail when Google Book ID changes from null to new ID")
+  void execute_shouldUpdateThumbnail_whenGoogleBookIdChangesFromNullToNewId() {
+    OffsetDateTime sevenDaysBeforeToday = OffsetDateTime.now().minusDays(7);
+    String oldThumbnail = "http://old-thumbnail.com.jpg";
+    String newThumbnail = "http://new-thumbnail.com.jpg";
+    String newGoogleBookId = "newId456";
+
+    Book bookSaved = Book.builder()
+        .id(1L)
+        .user(validUser)
+        .category(validCategory)
+        .title("Clean Code")
+        .author("Robert C. Martin")
+        .totalPages(464)
+        .pagesRead(0)
+        .thumbnailUrl(oldThumbnail)
+        .googleBookId(null)
+        .createdAt(sevenDaysBeforeToday)
+        .updatedAt(sevenDaysBeforeToday)
+        .build();
+
+    BookModelInput input = new BookModelInput("Clean Code", "Robert C. Martin", 464, 1L, newGoogleBookId);
+
+    when(categoryGateway.getById(1L)).thenReturn(Optional.of(validCategory));
+    when(bookGateway.findByIdAndUserId(bookSaved.getId(), validUser.getId())).thenReturn(bookSaved);
+
+    GoogleBooksVolume googleBooksVolume = new GoogleBooksVolume(
+        newGoogleBookId,
+        "Clean Code",
+        List.of("Robert C. Martin"),
+        464,
+        newThumbnail
+    );
+    when(googleBooksGateway.getVolumeById(newGoogleBookId)).thenReturn(Optional.of(googleBooksVolume));
+
+    when(bookGateway.update(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    BookModelOutput response = updateBookUseCase.execute(bookSaved.getId(), input, validUser.getId());
+
+    assertNotNull(response);
+    assertEquals(newThumbnail, response.thumbnailUrl());
+    assertEquals(newGoogleBookId, response.googleBookId());
+    verify(googleBooksGateway).getVolumeById(newGoogleBookId);
     verify(bookGateway).update(any(Book.class));
   }
 }
