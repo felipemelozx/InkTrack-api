@@ -15,6 +15,7 @@ public record BookModelOutput(
     int pagesRead,
     int progress,
     String thumbnailUrl,
+    String googleBookId,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt
 ) {

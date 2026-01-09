@@ -559,4 +559,140 @@ class BookControllerIntegrationTest {
     assertThat(book).isPresent();
     assertThat(book.get().getThumbnailUrl()).isNull();
   }
+
+  @Test
+  @DisplayName("Should search books successfully when query is valid")
+  void shouldSearchBooksSuccessfully() throws Exception {
+    String token = authenticateAndGetToken();
+
+    mockMvc.perform(get("/books/search")
+            .param("q", "Clean Code")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").isNotEmpty())
+        .andExpect(jsonPath("$.data.totalItems").isNumber())
+        .andExpect(jsonPath("$.data.volumes").isArray());
+  }
+
+  @Test
+  @DisplayName("Should return books with required fields when searching")
+  void shouldReturnBooksWithRequiredFieldsWhenSearching() throws Exception {
+    String token = authenticateAndGetToken();
+
+    mockMvc.perform(get("/books/search")
+            .param("q", "Java Programming")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.totalItems").isNumber())
+        .andExpect(jsonPath("$.data.volumes").isArray())
+        .andExpect(jsonPath("$.data.volumes[0].googleBooksId").isNotEmpty())
+        .andExpect(jsonPath("$.data.volumes[0].title").isNotEmpty())
+        .andExpect(jsonPath("$.data.volumes[0].thumbnailUrl").isNotEmpty());
+  }
+
+  @Test
+  @DisplayName("Should return empty results when query finds no books")
+  void shouldReturnEmptyResultsWhenQueryFindsNoBooks() throws Exception {
+    String token = authenticateAndGetToken();
+
+    String uniqueQuery = "xyznonexistentbook123456789";
+
+    mockMvc.perform(get("/books/search")
+            .param("q", uniqueQuery)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.totalItems").value(0))
+        .andExpect(jsonPath("$.data.volumes").isArray())
+        .andExpect(jsonPath("$.data.volumes").isEmpty());
+  }
+
+  @Test
+  @DisplayName("Should return multiple results for popular query")
+  void shouldReturnMultipleResultsForPopularQuery() throws Exception {
+    String token = authenticateAndGetToken();
+
+    mockMvc.perform(get("/books/search")
+            .param("q", "Harry Potter")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.totalItems").isNumber())
+        .andExpect(jsonPath("$.data.volumes").isArray())
+        .andExpect(jsonPath("$.data.volumes.length()").value(10));
+  }
+
+  @Test
+  @DisplayName("Should return Forbidden when searching without authentication")
+  void shouldReturnForbiddenWhenSearchingWithoutAuthentication() throws Exception {
+    mockMvc.perform(get("/books/search")
+            .param("q", "Clean Code"))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  @DisplayName("Should handle special characters in search query")
+  void shouldHandleSpecialCharactersInSearchQuery() throws Exception {
+    String token = authenticateAndGetToken();
+
+    mockMvc.perform(get("/books/search")
+            .param("q", "C++ Programming")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").isNotEmpty())
+        .andExpect(jsonPath("$.data.totalItems").isNumber())
+        .andExpect(jsonPath("$.data.volumes").isArray());
+  }
+
+  @Test
+  @DisplayName("Should return book with all fields populated")
+  void shouldReturnBookWithAllFieldsPopulated() throws Exception {
+    String token = authenticateAndGetToken();
+
+    String response = mockMvc.perform(get("/books/search")
+            .param("q", "Clean Code")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.volumes").isNotEmpty())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    int totalItems = objectMapper.readTree(response)
+        .get("data")
+        .get("totalItems")
+        .asInt();
+
+    if (totalItems > 0) {
+      mockMvc.perform(get("/books/search")
+              .param("q", "Clean Code")
+              .header("Authorization", "Bearer " + token))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.data.volumes[0].googleBooksId").isNotEmpty())
+          .andExpect(jsonPath("$.data.volumes[0].title").isNotEmpty())
+          .andExpect(jsonPath("$.data.volumes[0].author").isNotEmpty())
+          .andExpect(jsonPath("$.data.volumes[0].thumbnailUrl").isNotEmpty());
+    }
+  }
+
+  @Test
+  @DisplayName("Should return 400 when query parameter is missing")
+  void shouldReturnBadRequestWhenQueryParameterIsMissing() throws Exception {
+    String token = authenticateAndGetToken();
+
+    mockMvc.perform(get("/books/search")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("Should search books with exact phrase match")
+  void shouldSearchBooksWIthExactPhraseMatch() throws Exception {
+    String token = authenticateAndGetToken();
+
+    mockMvc.perform(get("/books/search")
+            .param("q", "Clean Code")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.totalItems").isNumber())
+        .andExpect(jsonPath("$.data.volumes").isArray());
+  }
 }
