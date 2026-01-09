@@ -5,6 +5,7 @@ import com.inktrack.core.domain.Category;
 import com.inktrack.core.domain.User;
 import com.inktrack.core.gateway.BookGateway;
 import com.inktrack.core.gateway.CategoryGateway;
+import com.inktrack.core.gateway.GoogleBooksGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ class UpdateBookUseCaseImplTest {
 
   @Mock
   private CategoryGateway categoryGateway;
+
+  @Mock
+  private GoogleBooksGateway googleBooksGateway;
 
   private UpdateBookUseCase updateBookUseCase;
 

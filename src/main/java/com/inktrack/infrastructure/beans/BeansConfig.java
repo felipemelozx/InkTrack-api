@@ -77,8 +77,12 @@ public class BeansConfig {
   }
 
   @Bean
-  public UpdateBookUseCase updateBookUseCase(BookGateway bookGateway, CategoryGateway categoryGateway) {
-    return new UpdateBookUseCaseImpl(bookGateway, categoryGateway);
+  public UpdateBookUseCase updateBookUseCase(
+      BookGateway bookGateway,
+      CategoryGateway categoryGateway,
+      GoogleBooksGateway googleBooksGateway
+  ) {
+    return new UpdateBookUseCaseImpl(bookGateway, categoryGateway, googleBooksGateway);
   }
 
   @Bean
