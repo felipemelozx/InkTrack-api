@@ -52,6 +52,12 @@ public class BookEntity {
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
 
+  @Column(name = "thumbnail_url")
+  private String thumbnailUrl;
+
+  @Column(name = "google_book_id")
+  private String googleBookId;
+
 
   protected BookEntity() {
   }
@@ -67,6 +73,8 @@ public class BookEntity {
     this.progress = builder.progress;
     this.createdAt = builder.createdAt;
     this.updatedAt = builder.updatedAt;
+    this.thumbnailUrl = builder.thumbnailUrl;
+    this.googleBookId = builder.googleBookId;
   }
 
   @PrePersist
@@ -96,6 +104,8 @@ public class BookEntity {
     private Integer progress;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private String thumbnailUrl;
+    private String googleBookId;
 
     private Builder() {}
 
@@ -149,6 +159,16 @@ public class BookEntity {
       return this;
     }
 
+    public Builder thumbnailUrl(String thumbnailUrl) {
+      this.thumbnailUrl = thumbnailUrl;
+      return this;
+    }
+
+    public Builder googleBookId(String googleBookId) {
+      this.googleBookId = googleBookId;
+      return this;
+    }
+
     public BookEntity build() {
       return new BookEntity(this);
     }
@@ -192,5 +212,13 @@ public class BookEntity {
 
   public OffsetDateTime getUpdatedAt() {
     return updatedAt;
+  }
+
+  public String getThumbnailUrl() {
+    return thumbnailUrl;
+  }
+
+  public String getGoogleBookId() {
+    return googleBookId;
   }
 }

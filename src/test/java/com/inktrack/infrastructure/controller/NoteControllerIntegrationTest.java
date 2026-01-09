@@ -151,7 +151,7 @@ class NoteControllerIntegrationTest {
     void shouldCreateNoteWhenDataIsValid() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Effective Java", "Joshua Bloch", 416, testCategoryId);
+        BookCreateRequest bookRequest = new BookCreateRequest("Effective Java", "Joshua Bloch", 416, testCategoryId, null);
         long bookId = createBook(token, bookRequest);
 
         CreateNoteRequest noteRequest = new CreateNoteRequest("This book is essential for every Java developer.");
@@ -211,7 +211,7 @@ class NoteControllerIntegrationTest {
     void shouldGetNotesPaginatedSuccessfully() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Domain-Driven Design", "Eric Evans", 400, testCategoryId);
+        BookCreateRequest bookRequest = new BookCreateRequest("Domain-Driven Design", "Eric Evans", 400, testCategoryId, null);
         long bookId = createBook(token, bookRequest);
 
         createNote(token, bookId, new CreateNoteRequest("Note about aggregates"));
@@ -235,7 +235,7 @@ class NoteControllerIntegrationTest {
     void shouldReturnEmptyListWhenBookHasNoNotes() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Clean Code", "Robert Martin", 464, testCategoryId);
+        BookCreateRequest bookRequest = new BookCreateRequest("Clean Code", "Robert Martin", 464, testCategoryId, null);
         long bookId = createBook(token, bookRequest);
 
         mockMvc.perform(get("/books/" + bookId + "/notes")
@@ -251,7 +251,7 @@ class NoteControllerIntegrationTest {
     void shouldUpdateNoteSuccessfully() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Refactoring", "Martin Fowler", 450, testCategoryId);
+        BookCreateRequest bookRequest = new BookCreateRequest("Refactoring", "Martin Fowler", 450, testCategoryId, null);
         long bookId = createBook(token, bookRequest);
 
         long noteId = createNote(
@@ -295,7 +295,7 @@ class NoteControllerIntegrationTest {
     void shouldReturnBadRequestWhenUpdatingWithBlankContent() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Clean Architecture", "Robert Martin", 350, testCategoryId);
+        BookCreateRequest bookRequest = new BookCreateRequest("Clean Architecture", "Robert Martin", 350, testCategoryId, null);
         long bookId = createBook(token, bookRequest);
 
         long noteId = createNote(
@@ -322,7 +322,7 @@ class NoteControllerIntegrationTest {
     void shouldReturnBadRequestWhenUpdatingWithLongContent() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Java Concurrency", "Brian Goetz", 420, testCategoryId);
+        BookCreateRequest bookRequest = new BookCreateRequest("Java Concurrency", "Brian Goetz", 420, testCategoryId, null);
         long bookId = createBook(token, bookRequest);
 
         long noteId = createNote(
@@ -349,7 +349,7 @@ class NoteControllerIntegrationTest {
     void shouldDeleteNoteSuccessfully() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Design Patterns", "Gang of Four", 395, testCategoryId);
+        BookCreateRequest bookRequest = new BookCreateRequest("Design Patterns", "Gang of Four", 395, testCategoryId, null);
         long bookId = createBook(token, bookRequest);
 
         long noteId = createNote(
@@ -373,7 +373,7 @@ class NoteControllerIntegrationTest {
     void shouldReturnNotFoundWhenDeletingNonExistingNote() throws Exception {
         String token = authenticateAndGetToken();
 
-        BookCreateRequest bookRequest = new BookCreateRequest("Test Book", "Test Author", 100, testCategoryId);
+        BookCreateRequest bookRequest = new BookCreateRequest("Test Book", "Test Author", 100, testCategoryId, null);
         long bookId = createBook(token, bookRequest);
 
         mockMvc.perform(
