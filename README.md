@@ -387,9 +387,6 @@ String token = JWT.create()
 - Database indexing strategy significantly impacts performance
 - Monitoring query performance is essential for scaling
 
-**Before**: 5.2 seconds for 1000 reading sessions
-**After**: 180 milliseconds for 1000 reading sessions (28x faster)
-
 ## 🛠️ Tech Stack
 
 ### Core
