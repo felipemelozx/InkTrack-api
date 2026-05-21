@@ -115,6 +115,7 @@ jobs:
           DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
           APP_NAME=${{ env.APP_NAME }}
           IMAGE_TAG=latest
+          API_DOMAIN=${{ secrets.API_DOMAIN }}
           APP_PORT=${{ secrets.APP_PORT }}
           SERVER_CONTEXT_PATH=/api/v1
           SPRING_PROFILES_ACTIVE=prod
