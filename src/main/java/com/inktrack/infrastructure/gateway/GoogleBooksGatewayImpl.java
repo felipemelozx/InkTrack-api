@@ -9,6 +9,7 @@ import com.inktrack.infrastructure.config.CacheConfig;
 import com.inktrack.infrastructure.config.GoogleBooksConfig;
 import com.inktrack.infrastructure.exception.ExternalApiException;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
@@ -22,10 +23,15 @@ public class GoogleBooksGatewayImpl implements GoogleBooksGateway {
 
   private final RestClient restClient;
 
+  @Autowired
   public GoogleBooksGatewayImpl(GoogleBooksConfig config) {
     this.restClient = RestClient.builder()
         .baseUrl(config.getBaseUrl())
         .build();
+  }
+
+  GoogleBooksGatewayImpl(RestClient restClient) {
+    this.restClient = restClient;
   }
 
 
