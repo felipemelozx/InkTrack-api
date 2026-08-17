@@ -10,12 +10,16 @@ import com.inktrack.core.gateway.UserGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,10 +43,13 @@ class UpdateUserUseCaseImplTest {
 
   private User existingUser;
 
+  private User otherUser;
+
   @BeforeEach
   void setUp() {
     updateUserUseCase = new UpdateUserUseCaseImpl(userGateway, passwordGateway);
     existingUser = new User(userId, "John Doe", "john@email.com", "hashed_password", LocalDateTime.now());
+    otherUser = new User(UUID.randomUUID(), "Other", "taken@email.com", "hash", LocalDateTime.now());
   }
 
   @Test
@@ -90,56 +97,35 @@ class UpdateUserUseCaseImplTest {
     assertEquals("John Doe", result.getName());
   }
 
-  @Test
-  void execute_shouldThrowException_whenEmailChangedWithoutPassword() {
-    UpdateUserRequestModel request = new UpdateUserRequestModel(
-        userId, "John Doe", "new@email.com", null
+  private static Stream<Arguments> provideEmailUpdateFailureScenarios() {
+    return Stream.of(
+        Arguments.of("new@email.com", null, false, false, FieldDomainValidationException.class),
+        Arguments.of("new@email.com", "   ", false, false, FieldDomainValidationException.class),
+        Arguments.of("new@email.com", "WrongPassword1!", false, false, InvalidCredentialsException.class),
+        Arguments.of("taken@email.com", "Password123!", true, true, EmailAlreadyExistsException.class)
     );
-
-    when(userGateway.findById(userId)).thenReturn(Optional.of(existingUser));
-
-    assertThrows(FieldDomainValidationException.class, () -> updateUserUseCase.execute(request));
-    verify(userGateway, never()).update(any());
   }
 
-  @Test
-  void execute_shouldThrowException_whenEmailChangedWithBlankPassword() {
-    UpdateUserRequestModel request = new UpdateUserRequestModel(
-        userId, "John Doe", "new@email.com", "   "
-    );
-
+  @ParameterizedTest
+  @MethodSource("provideEmailUpdateFailureScenarios")
+  void execute_shouldThrowException_whenEmailUpdateInvalid(
+      String email,
+      String currentPassword,
+      boolean passwordMatches,
+      boolean emailTaken,
+      Class<? extends RuntimeException> expectedException) {
     when(userGateway.findById(userId)).thenReturn(Optional.of(existingUser));
 
-    assertThrows(FieldDomainValidationException.class, () -> updateUserUseCase.execute(request));
-    verify(userGateway, never()).update(any());
-  }
+    if (currentPassword != null && !currentPassword.isBlank()) {
+      when(passwordGateway.matches(currentPassword, "hashed_password")).thenReturn(passwordMatches);
+    }
+    if (emailTaken) {
+      when(userGateway.findByEmail(email)).thenReturn(Optional.of(otherUser));
+    }
 
-  @Test
-  void execute_shouldThrowException_whenCurrentPasswordDoesNotMatch() {
-    UpdateUserRequestModel request = new UpdateUserRequestModel(
-        userId, "John Doe", "new@email.com", "WrongPassword1!"
-    );
+    UpdateUserRequestModel request = new UpdateUserRequestModel(userId, "John Doe", email, currentPassword);
 
-    when(userGateway.findById(userId)).thenReturn(Optional.of(existingUser));
-    when(passwordGateway.matches("WrongPassword1!", "hashed_password")).thenReturn(false);
-
-    assertThrows(InvalidCredentialsException.class, () -> updateUserUseCase.execute(request));
-    verify(userGateway, never()).update(any());
-  }
-
-  @Test
-  void execute_shouldThrowException_whenEmailAlreadyBelongsToAnotherUser() {
-    UpdateUserRequestModel request = new UpdateUserRequestModel(
-        userId, "John Doe", "taken@email.com", "Password123!"
-    );
-
-    User otherUser = new User(UUID.randomUUID(), "Other", "taken@email.com", "hash", LocalDateTime.now());
-
-    when(userGateway.findById(userId)).thenReturn(Optional.of(existingUser));
-    when(passwordGateway.matches("Password123!", "hashed_password")).thenReturn(true);
-    when(userGateway.findByEmail("taken@email.com")).thenReturn(Optional.of(otherUser));
-
-    assertThrows(EmailAlreadyExistsException.class, () -> updateUserUseCase.execute(request));
+    assertThrows(expectedException, () -> updateUserUseCase.execute(request));
     verify(userGateway, never()).update(any());
   }
 

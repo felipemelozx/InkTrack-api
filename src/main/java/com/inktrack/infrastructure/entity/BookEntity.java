@@ -15,6 +15,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 
 @Entity
@@ -82,13 +83,13 @@ public class BookEntity {
 
   @PrePersist
   protected void onCreate() {
-    this.createdAt = OffsetDateTime.now();
-    this.updatedAt = OffsetDateTime.now();
+    this.createdAt = OffsetDateTime.now(ZoneOffset.UTC);
+    this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
   }
 
   @PreUpdate
   protected void onUpdate() {
-    this.updatedAt = OffsetDateTime.now();
+    this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
   }
 
   public static Builder builder() {

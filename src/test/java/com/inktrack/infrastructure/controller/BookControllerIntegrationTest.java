@@ -39,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -99,6 +98,15 @@ class BookControllerIntegrationTest {
       }
       return createMockSearchResponse(10);
     });
+
+    noteRepository.deleteAllInBatch();
+    readingRepository.deleteAllInBatch();
+    bookRepository.deleteAllInBatch();
+    userRepository.deleteAllInBatch();
+    categoryRepository.deleteAllInBatch();
+
+    CategoryEntity category = categoryRepository.save(new CategoryEntity(null, "Fiction", java.time.OffsetDateTime.now()));
+    testCategoryId = category.getId();
   }
 
   private SearchBooksOutput createMockSearchResponse(int count) {
@@ -113,19 +121,6 @@ class BookControllerIntegrationTest {
       ));
     }
     return new SearchBooksOutput(count, volumes);
-  }
-
-  @BeforeEach
-  void cleanDatabase() {
-    noteRepository.deleteAllInBatch();
-    readingRepository.deleteAllInBatch();
-    bookRepository.deleteAllInBatch();
-    userRepository.deleteAllInBatch();
-    categoryRepository.deleteAllInBatch();
-
-    // Create default category for tests
-    CategoryEntity category = categoryRepository.save(new CategoryEntity(null, "Fiction", java.time.OffsetDateTime.now()));
-    testCategoryId = category.getId();
   }
 
   private String authenticateAndGetToken() throws Exception {

@@ -54,10 +54,7 @@ class UserGatewayIntegrationTest {
   @BeforeEach
   void setUp() {
     userGateway = new UserGatewayImpl(userRepository, userMapper);
-  }
 
-  @BeforeEach
-  void cleanDatabase() {
     noteRepository.deleteAllInBatch();
     readingSessionRepository.deleteAllInBatch();
     bookRepository.deleteAllInBatch();

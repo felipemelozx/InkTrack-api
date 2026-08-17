@@ -68,10 +68,7 @@ class UserControllerIntegrationTest {
 
     objectMapper = new ObjectMapper();
     objectMapper.findAndRegisterModules();
-  }
 
-  @BeforeEach
-  void cleanDatabase() {
     noteRepository.deleteAllInBatch();
     readingSessionRepository.deleteAllInBatch();
     bookRepository.deleteAllInBatch();
