@@ -28,6 +28,10 @@ public class GoogleBooksGatewayImpl implements GoogleBooksGateway {
         .build();
   }
 
+  GoogleBooksGatewayImpl(RestClient restClient) {
+    this.restClient = restClient;
+  }
+
 
   @Override
   @Cacheable(value = CacheConfig.GOOGLE_BOOKS_CACHE, key = "'search:' + #query")

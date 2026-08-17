@@ -2,6 +2,9 @@ package com.inktrack.infrastructure.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inktrack.InkTrackApplication;
+import com.inktrack.core.gateway.GoogleBooksGateway;
+import com.inktrack.core.usecases.book.GoogleBooksVolume;
+import com.inktrack.core.usecases.book.SearchBooksOutput;
 import com.inktrack.infrastructure.dtos.book.BookCreateRequest;
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
 import com.inktrack.infrastructure.dtos.user.LoginRequest;
@@ -18,12 +21,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +37,9 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -66,6 +75,9 @@ class BookControllerIntegrationTest {
   @Autowired
   private CategoryRepository categoryRepository;
 
+  @MockitoBean
+  private GoogleBooksGateway googleBooksGateway;
+
   private Long testCategoryId;
 
   @BeforeEach
@@ -77,6 +89,30 @@ class BookControllerIntegrationTest {
 
     objectMapper = new ObjectMapper();
     objectMapper.findAndRegisterModules();
+
+    given(googleBooksGateway.getVolumeById(anyString())).willReturn(Optional.empty());
+
+    given(googleBooksGateway.searchBooks(anyString())).willAnswer(invocation -> {
+      String query = invocation.getArgument(0);
+      if ("xyznonexistentbook123456789".equals(query)) {
+        return new SearchBooksOutput(0, List.of());
+      }
+      return createMockSearchResponse(10);
+    });
+  }
+
+  private SearchBooksOutput createMockSearchResponse(int count) {
+    List<GoogleBooksVolume> volumes = new ArrayList<>();
+    for (int i = 0; i < count; i++) {
+      volumes.add(new GoogleBooksVolume(
+          "google-id-" + i,
+          "Book Title " + i,
+          List.of("Author " + i),
+          200 + i,
+          "http://thumbnail.com/book-" + i
+      ));
+    }
+    return new SearchBooksOutput(count, volumes);
   }
 
   @BeforeEach
