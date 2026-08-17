@@ -2,19 +2,36 @@ package com.inktrack.infrastructure.mapper;
 
 import com.inktrack.core.domain.User;
 import com.inktrack.core.usecases.user.AuthRequest;
+import com.inktrack.core.usecases.user.ChangePasswordRequestModel;
 import com.inktrack.core.usecases.user.CreateUserRequestModel;
+import com.inktrack.core.usecases.user.UpdateUserRequestModel;
 import com.inktrack.core.usecases.user.UserOutput;
+import com.inktrack.infrastructure.dtos.user.ChangePasswordRequest;
 import com.inktrack.infrastructure.dtos.user.CreateUserRequest;
 import com.inktrack.infrastructure.dtos.user.LoginRequest;
+import com.inktrack.infrastructure.dtos.user.UpdateUserRequest;
 import com.inktrack.infrastructure.dtos.user.UserResponse;
 import com.inktrack.infrastructure.entity.UserEntity;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 public class UserMapper {
 
   public CreateUserRequestModel createRequestToRequestModel(CreateUserRequest request) {
     return new CreateUserRequestModel(request.name(), request.email(), request.password());
+  }
+
+  public UpdateUserRequestModel updateRequestToRequestModel(UUID userId, UpdateUserRequest request) {
+    return new UpdateUserRequestModel(userId, request.name(), request.email(), request.currentPassword());
+  }
+
+  public ChangePasswordRequestModel changePasswordRequestToRequestModel(
+      UUID userId,
+      ChangePasswordRequest request
+  ) {
+    return new ChangePasswordRequestModel(userId, request.currentPassword(), request.newPassword());
   }
 
   public UserEntity domainToEntity(User user) {

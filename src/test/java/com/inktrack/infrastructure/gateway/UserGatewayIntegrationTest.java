@@ -2,9 +2,12 @@ package com.inktrack.infrastructure.gateway;
 
 import com.inktrack.InkTrackApplication;
 import com.inktrack.core.domain.User;
+import com.inktrack.infrastructure.entity.BookEntity;
+import com.inktrack.infrastructure.entity.CategoryEntity;
 import com.inktrack.infrastructure.entity.UserEntity;
 import com.inktrack.infrastructure.mapper.UserMapper;
 import com.inktrack.infrastructure.persistence.BookRepository;
+import com.inktrack.infrastructure.persistence.CategoryRepository;
 import com.inktrack.infrastructure.persistence.NoteRepository;
 import com.inktrack.infrastructure.persistence.ReadingSessionRepository;
 import com.inktrack.infrastructure.persistence.UserRepository;
@@ -15,7 +18,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -41,6 +46,9 @@ class UserGatewayIntegrationTest {
   @Autowired
   private ReadingSessionRepository readingSessionRepository;
 
+  @Autowired
+  private CategoryRepository categoryRepository;
+
   private UserGatewayImpl userGateway;
 
   @BeforeEach
@@ -54,6 +62,7 @@ class UserGatewayIntegrationTest {
     readingSessionRepository.deleteAllInBatch();
     bookRepository.deleteAllInBatch();
     userRepository.deleteAllInBatch();
+    categoryRepository.deleteAllInBatch();
   }
 
   @Test
@@ -121,5 +130,77 @@ class UserGatewayIntegrationTest {
     assertEquals("Alice", foundAlice.get().getName());
     assertEquals("Bob", foundBob.get().getName());
     assertNotEquals(foundAlice.get().getId(), foundBob.get().getId());
+  }
+
+  @Test
+  void shouldFindUserById() {
+    User user = new User(null, "John Doe", "john@example.com", "hashed_password", LocalDateTime.now());
+
+    User savedUser = userGateway.save(user);
+
+    Optional<User> retrievedUser = userGateway.findById(savedUser.getId());
+    assertTrue(retrievedUser.isPresent());
+    assertEquals(savedUser.getId(), retrievedUser.get().getId());
+    assertEquals("John Doe", retrievedUser.get().getName());
+  }
+
+  @Test
+  void shouldReturnEmptyWhenUserNotFoundById() {
+    Optional<User> result = userGateway.findById(UUID.randomUUID());
+
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void shouldUpdateUserData() {
+    User user = new User(null, "John Doe", "john@example.com", "hashed_password", LocalDateTime.now());
+    User savedUser = userGateway.save(user);
+
+    User updatedUser = new User(
+        savedUser.getId(),
+        "John Doe Updated",
+        "john.updated@example.com",
+        "new_hashed_password",
+        savedUser.getCreatedAt()
+    );
+
+    User result = userGateway.update(updatedUser);
+
+    assertEquals("John Doe Updated", result.getName());
+    assertEquals("john.updated@example.com", result.getEmail());
+
+    Optional<User> retrieved = userGateway.findById(savedUser.getId());
+    assertTrue(retrieved.isPresent());
+    assertEquals("John Doe Updated", retrieved.get().getName());
+    assertEquals("john.updated@example.com", retrieved.get().getEmail());
+    assertEquals("new_hashed_password", retrieved.get().getPassword());
+
+    Optional<User> oldEmail = userGateway.findByEmail("john@example.com");
+    assertTrue(oldEmail.isEmpty());
+  }
+
+  @Test
+  void shouldDeleteUserAndCascadeBooks() {
+    User user = new User(null, "John Doe", "john@example.com", "hashed_password", LocalDateTime.now());
+    User savedUser = userGateway.save(user);
+
+    CategoryEntity category = categoryRepository.save(new CategoryEntity(null, "Fiction", OffsetDateTime.now()));
+
+    UserEntity userEntity = userRepository.findById(savedUser.getId()).orElseThrow();
+    BookEntity book = BookEntity.builder()
+        .user(userEntity)
+        .category(category)
+        .title("Book Title")
+        .author("Author")
+        .totalPages(100)
+        .pagesRead(0)
+        .progress(0)
+        .build();
+    bookRepository.save(book);
+
+    userGateway.deleteById(savedUser.getId());
+
+    assertTrue(userRepository.findById(savedUser.getId()).isEmpty());
+    assertEquals(0, bookRepository.count());
   }
 }
