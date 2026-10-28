@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -128,7 +127,7 @@ class GoogleBooksGatewayImplTest {
     var responseSpec = mock(RestClient.ResponseSpec.class);
 
     given(restClient.get()).willReturn(uriSpec);
-    given(uriSpec.uri(anyString(), any(Object[].class))).willReturn(uriSpec);
+    given(uriSpec.uri(any(Function.class))).willReturn(uriSpec);
     given(uriSpec.retrieve()).willReturn(responseSpec);
     given(responseSpec.onStatus(any(), any())).willReturn(responseSpec);
     given(responseSpec.body(GoogleBooksItemResponse.class))
@@ -249,6 +248,7 @@ class GoogleBooksGatewayImplTest {
     given(restClient.get()).willReturn(uriSpec);
     given(uriSpec.uri(any(Function.class))).willReturn(uriSpec);
     given(uriSpec.retrieve()).willReturn(responseSpec);
+    given(responseSpec.onStatus(any(), any())).willReturn(responseSpec);
     given(responseSpec.body(GoogleBooksSearchResponse.class)).willReturn(response);
 
     return injectRestClient(restClient);
@@ -260,7 +260,7 @@ class GoogleBooksGatewayImplTest {
     var responseSpec = mock(RestClient.ResponseSpec.class);
 
     given(restClient.get()).willReturn(uriSpec);
-    given(uriSpec.uri(anyString(), any(Object[].class))).willReturn(uriSpec);
+    given(uriSpec.uri(any(Function.class))).willReturn(uriSpec);
     given(uriSpec.retrieve()).willReturn(responseSpec);
     given(responseSpec.onStatus(any(), any())).willReturn(responseSpec);
     given(responseSpec.body(GoogleBooksItemResponse.class)).willReturn(response);

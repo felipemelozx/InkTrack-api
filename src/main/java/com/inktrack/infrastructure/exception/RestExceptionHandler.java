@@ -11,6 +11,8 @@ import com.inktrack.core.exception.ResourceNotFoundException;
 import com.inktrack.core.exception.UnauthorizedException;
 import com.inktrack.infrastructure.utils.CustomFieldError;
 import com.inktrack.infrastructure.utils.response.ApiResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -26,6 +28,8 @@ import java.util.List;
 
 @ControllerAdvice
 public class RestExceptionHandler {
+
+  private static final Logger LOG = LoggerFactory.getLogger(RestExceptionHandler.class);
 
   private List<CustomFieldError> extractErrors(List<ObjectError> objectErrors) {
     return objectErrors.stream()
@@ -138,6 +142,18 @@ public class RestExceptionHandler {
     );
   }
 
+  @ExceptionHandler(ExternalApiException.class)
+  public ResponseEntity<ApiResponse<CustomFieldError>> handleExternalApiException(
+      ExternalApiException ex
+  ) {
+    HttpStatus status = HttpStatus.resolve(ex.getStatusCode());
+    HttpStatus resolved = status != null ? status : HttpStatus.BAD_GATEWAY;
+    return new ResponseEntity<>(
+        ApiResponse.failure(List.of(new CustomFieldError("external_api", ex.getMessage())), ex.getMessage()),
+        resolved
+    );
+  }
+
   @ExceptionHandler(BookNotFoundException.class)
   public ResponseEntity<ApiResponse<CustomFieldError>> handleBookNotFoundException(
       BookNotFoundException ex
@@ -203,6 +219,7 @@ public class RestExceptionHandler {
   public ResponseEntity<ApiResponse<CustomFieldError>> handleGenericException(
       Exception ex
   ) {
+    LOG.error("Unhandled exception on request", ex);
 
     CustomFieldError error = new CustomFieldError(
         "internal_error",
