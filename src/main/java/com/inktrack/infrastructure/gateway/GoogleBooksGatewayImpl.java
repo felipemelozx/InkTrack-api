@@ -9,8 +9,10 @@ import com.inktrack.infrastructure.config.CacheConfig;
 import com.inktrack.infrastructure.config.GoogleBooksConfig;
 import com.inktrack.infrastructure.exception.ExternalApiException;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -21,11 +23,26 @@ import java.util.Optional;
 public class GoogleBooksGatewayImpl implements GoogleBooksGateway {
 
   private final RestClient restClient;
+  private final String apiKey;
+  private final int maxResults;
 
+  @Autowired
   public GoogleBooksGatewayImpl(GoogleBooksConfig config) {
+    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+    requestFactory.setConnectTimeout(config.getTimeoutMs());
+    requestFactory.setReadTimeout(config.getTimeoutMs());
     this.restClient = RestClient.builder()
         .baseUrl(config.getBaseUrl())
+        .requestFactory(requestFactory)
         .build();
+    this.apiKey = config.getApiKey();
+    this.maxResults = config.getMaxResults();
+  }
+
+  GoogleBooksGatewayImpl(RestClient restClient) {
+    this.restClient = restClient;
+    this.apiKey = null;
+    this.maxResults = 10;
   }
 
 
@@ -38,11 +55,21 @@ public class GoogleBooksGatewayImpl implements GoogleBooksGateway {
             .uri(uriBuilder -> uriBuilder
                 .path("/volumes")
                 .queryParam("q", query)
-                .queryParam("maxResults", 10)
+                .queryParam("maxResults", maxResults)
                 .queryParam("printType", "books")
+                .queryParamIfPresent("key", Optional.ofNullable(apiKey).filter(key -> !key.isBlank()))
                 .build()
             )
             .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+              throw onClientError(res.getStatusCode());
+            })
+            .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
+              throw new ExternalApiException(
+                  "Erro no Google Books",
+                  HttpStatus.BAD_GATEWAY.value()
+              );
+            })
             .body(GoogleBooksSearchResponse.class);
 
     if (response == null) {
@@ -65,7 +92,11 @@ public class GoogleBooksGatewayImpl implements GoogleBooksGateway {
   public Optional<GoogleBooksVolume> getVolumeById(String volumeId) {
     GoogleBooksItemResponse response =
         restClient.get()
-            .uri("/volumes/{id}", volumeId)
+            .uri(uriBuilder -> uriBuilder
+                .path("/volumes/{id}")
+                .queryParamIfPresent("key", Optional.ofNullable(apiKey).filter(key -> !key.isBlank()))
+                .build(volumeId)
+            )
             .retrieve()
             .onStatus(
                 HttpStatusCode::is4xxClientError,
@@ -90,6 +121,19 @@ public class GoogleBooksGatewayImpl implements GoogleBooksGateway {
     return Optional.ofNullable(response).map(this::toDomain);
   }
 
+  private ExternalApiException onClientError(HttpStatusCode status) {
+    if (status.value() == 429) {
+      return new ExternalApiException(
+          "Quota de buscas do Google Books excedida. Configure a GOOGLE_BOOKS_API_KEY e tente novamente mais tarde.",
+          HttpStatus.SERVICE_UNAVAILABLE.value()
+      );
+    }
+    return new ExternalApiException(
+        "Requisição inválida ao Google Books",
+        HttpStatus.BAD_GATEWAY.value()
+    );
+  }
+
   private GoogleBooksVolume toDomain(GoogleBooksItemResponse item) {
     return new GoogleBooksVolume(
         item.id(),
@@ -102,4 +146,3 @@ public class GoogleBooksGatewayImpl implements GoogleBooksGateway {
     );
   }
 }
-

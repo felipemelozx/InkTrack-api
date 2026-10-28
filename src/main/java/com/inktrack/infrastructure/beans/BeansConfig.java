@@ -39,12 +39,20 @@ import com.inktrack.core.usecases.reading.sessions.DeleteReadingSessionUseCaseIm
 import com.inktrack.core.usecases.reading.sessions.GetReadingSessionByBookIdUseCaseImpl;
 import com.inktrack.core.usecases.reading.sessions.UpdateReadingSessionUseCase;
 import com.inktrack.core.usecases.reading.sessions.UpdateReadingSessionUseCaseImpl;
+import com.inktrack.core.usecases.user.ChangePasswordUseCase;
+import com.inktrack.core.usecases.user.ChangePasswordUseCaseImpl;
 import com.inktrack.core.usecases.user.CreateUserUseCase;
 import com.inktrack.core.usecases.user.CreateUserUseCaseImpl;
+import com.inktrack.core.usecases.user.DeleteAccountUseCase;
+import com.inktrack.core.usecases.user.DeleteAccountUseCaseImpl;
+import com.inktrack.core.usecases.user.GetCurrentUserUseCase;
+import com.inktrack.core.usecases.user.GetCurrentUserUseCaseImpl;
 import com.inktrack.core.usecases.user.LoginUseCase;
 import com.inktrack.core.usecases.user.LoginUseCaseImpl;
 import com.inktrack.core.usecases.user.RefreshTokenUseCase;
 import com.inktrack.core.usecases.user.RefreshTokenUseCaseImpl;
+import com.inktrack.core.usecases.user.UpdateUserUseCase;
+import com.inktrack.core.usecases.user.UpdateUserUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -65,6 +73,35 @@ public class BeansConfig {
   @Bean
   public RefreshTokenUseCase refreshTokenUseCase(JwtGateway jwtGateway) {
     return new RefreshTokenUseCaseImpl(jwtGateway);
+  }
+
+  @Bean
+  public GetCurrentUserUseCase getCurrentUserUseCase(UserGateway userGateway) {
+    return new GetCurrentUserUseCaseImpl(userGateway);
+  }
+
+  @Bean
+  public UpdateUserUseCase updateUserUseCase(
+      UserGateway userGateway,
+      PasswordGateway passwordGateway
+  ) {
+    return new UpdateUserUseCaseImpl(userGateway, passwordGateway);
+  }
+
+  @Bean
+  public ChangePasswordUseCase changePasswordUseCase(
+      UserGateway userGateway,
+      PasswordGateway passwordGateway
+  ) {
+    return new ChangePasswordUseCaseImpl(userGateway, passwordGateway);
+  }
+
+  @Bean
+  public DeleteAccountUseCase deleteAccountUseCase(
+      UserGateway userGateway,
+      PasswordGateway passwordGateway
+  ) {
+    return new DeleteAccountUseCaseImpl(userGateway, passwordGateway);
   }
 
   @Bean

@@ -8,6 +8,7 @@ import com.inktrack.infrastructure.persistence.UserRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class UserGatewayImpl implements UserGateway {
@@ -27,6 +28,12 @@ public class UserGatewayImpl implements UserGateway {
   }
 
   @Override
+  public Optional<User> findById(UUID id) {
+    return userRepository.findById(id)
+        .map(userMapper::entityToDomain);
+  }
+
+  @Override
   public User save(User user) {
     UserEntity userEntity = userRepository.save(userMapper.domainToEntity(user));
     return userMapper.entityToDomain(userEntity);
@@ -34,6 +41,11 @@ public class UserGatewayImpl implements UserGateway {
 
   @Override
   public User update(User user) {
-    return null;
+    return save(user);
+  }
+
+  @Override
+  public void deleteById(UUID id) {
+    userRepository.deleteById(id);
   }
 }

@@ -7,7 +7,7 @@ on:
 
 env:
   APP_NAME: ${{ secrets.APP_NAME }}
-  JAVA_VERSION: 17
+  JAVA_VERSION: 21
 
 jobs:
   build-and-test:
@@ -15,18 +15,18 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Cache Maven
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2/repository
@@ -47,7 +47,7 @@ jobs:
 
       - name: Upload Test Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-reports
           path: |
@@ -60,10 +60,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
@@ -103,7 +103,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Deploy with Docker Compose (no downtime)
         run: |
@@ -115,6 +115,7 @@ jobs:
           DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
           APP_NAME=${{ env.APP_NAME }}
           IMAGE_TAG=latest
+          API_DOMAIN=${{ secrets.API_DOMAIN }}
           APP_PORT=${{ secrets.APP_PORT }}
           SERVER_CONTEXT_PATH=/api/v1
           SPRING_PROFILES_ACTIVE=prod
