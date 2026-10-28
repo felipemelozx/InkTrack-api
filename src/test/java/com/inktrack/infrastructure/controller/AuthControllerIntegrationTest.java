@@ -26,6 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.Date;
 
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -83,9 +84,9 @@ class AuthControllerIntegrationTest {
         .andExpect(jsonPath("$.data.createdAt").value(notNullValue()));
 
     var users = userRepository.findAll();
-    assert users.size() == 1;
-    assert users.get(0).getEmail().equals("john@example.com");
-    assert users.get(0).getName().equals("John Doe");
+    assertEquals(1, users.size());
+    assertEquals("john@example.com", users.get(0).getEmail());
+    assertEquals("John Doe", users.get(0).getName());
   }
 
   @Test
@@ -103,7 +104,7 @@ class AuthControllerIntegrationTest {
         .andExpect(status().isConflict());
 
     var users = userRepository.findAll();
-    assert users.size() == 1;
+    assertEquals(1, users.size());
   }
 
   @Test

@@ -35,6 +35,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -196,8 +197,8 @@ class BookControllerIntegrationTest {
     createBook(token, request);
 
     var books = bookRepository.findAll();
-    assert books.size() == 1;
-    assert books.get(0).getTitle().equals("Clean Code");
+    assertEquals(1, books.size());
+    assertEquals("Clean Code", books.get(0).getTitle());
   }
 
   @Test
@@ -249,8 +250,8 @@ class BookControllerIntegrationTest {
     createBook(token, request);
 
     List<BookEntity> books = bookRepository.findAll();
-    assert books.size() == 1;
-    assert books.get(0).getTitle().equals("Clean Code");
+    assertEquals(1, books.size());
+    assertEquals("Clean Code", books.get(0).getTitle());
 
     Long bookId = books.get(0).getId();
     BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500, testCategoryId, null);
@@ -267,9 +268,9 @@ class BookControllerIntegrationTest {
 
 
     var book = bookRepository.findById(bookId);
-    assert book.get().getTitle().equals(updateRequest.title());
-    assert book.get().getAuthor().equals(updateRequest.author());
-    assert book.get().getTotalPages().equals(updateRequest.totalPages());
+    assertEquals(updateRequest.title(), book.get().getTitle());
+    assertEquals(updateRequest.author(), book.get().getAuthor());
+    assertEquals(updateRequest.totalPages(), book.get().getTotalPages());
   }
 
   @Test
@@ -282,8 +283,8 @@ class BookControllerIntegrationTest {
     createBook(token, request);
 
     List<BookEntity> books = bookRepository.findAll();
-    assert books.size() == 1;
-    assert books.get(0).getTitle().equals("Clean Code");
+    assertEquals(1, books.size());
+    assertEquals("Clean Code", books.get(0).getTitle());
 
     Long bookId = books.get(0).getId();
     BookCreateRequest updateRequest = new BookCreateRequest("Clean Code PDF", "Robert C. Martin", 500, testCategoryId, null);
@@ -300,10 +301,10 @@ class BookControllerIntegrationTest {
 
 
     books = bookRepository.findAll();
-    assert books.size() == 1;
-    assert books.get(0).getTitle().equals(request.title());
-    assert books.get(0).getAuthor().equals(request.author());
-    assert books.get(0).getTotalPages().equals(request.totalPages());
+    assertEquals(1, books.size());
+    assertEquals(request.title(), books.get(0).getTitle());
+    assertEquals(request.author(), books.get(0).getAuthor());
+    assertEquals(request.totalPages(), books.get(0).getTotalPages());
   }
 
   @Test

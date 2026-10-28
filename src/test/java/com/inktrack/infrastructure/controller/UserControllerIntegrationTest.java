@@ -25,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -253,7 +254,7 @@ class UserControllerIntegrationTest {
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isNoContent());
 
-    assert userRepository.findByEmail("delete-account@example.com").isEmpty();
+    assertTrue(userRepository.findByEmail("delete-account@example.com").isEmpty());
   }
 
   @Test
@@ -268,6 +269,6 @@ class UserControllerIntegrationTest {
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
 
-    assert userRepository.findByEmail("delete-wrong@example.com").isPresent();
+    assertTrue(userRepository.findByEmail("delete-wrong@example.com").isPresent());
   }
 }
